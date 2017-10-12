@@ -15,19 +15,19 @@ rows = gtif.RasterYSize
 bands = gtif.RasterCount
 
 band = gtif.GetRasterBand(1)
-print band
+print (band)
 bandtype = gdal.GetDataTypeName(band.DataType)
-print bandtype
+print (bandtype)
 
 
-'''
+
 # print gtif[0][0]
 band = gtif.GetRasterBand(1)
-print "Raster 1 x size  {0}".format(gtif.GetRasterBand(1).XSize)
-print "Raster 1 y size {0}".format(gtif.GetRasterBand(1).YSize)
+print ("Raster 1 x size  {0}".format(gtif.GetRasterBand(1).XSize))
+print ("Raster 1 y size {0}".format(gtif.GetRasterBand(1).YSize))
 
 bandtype = gdal.GetDataTypeName(band.DataType)
-print bandtype
+print (bandtype)
 data = band.ReadAsArray(0, 0, gtif.RasterXSize, gtif.RasterYSize)
 
 #print gtif
@@ -43,13 +43,13 @@ print("Size is {} x {} x {}".format(gtif.RasterXSize,
 print("Projection is {}".format(gtif.GetProjection()))
 geotransform = gtif.GetGeoTransform()
 
-print len(geotransform)
-print geotransform[0]
-print geotransform[1]
-print geotransform[2]
-print geotransform[3]
-print geotransform[4]
-print geotransform[5]
+print (len(geotransform))
+print (geotransform[0])
+print (geotransform[1])
+print (geotransform[2])
+print (geotransform[3])
+print (geotransform[4])
+print (geotransform[5])
 
 
 if geotransform:
@@ -81,8 +81,7 @@ scanline = band.ReadRaster(xoff=0, yoff=0,
 #print scanline
 #print type(scanline)
 tuple_of_floats = struct.unpack('f' * band.XSize, scanline)
-print tuple_of_floats
-print type(tuple_of_floats)
-print tuple_of_floats.__sizeof__()
-print rows*cols
-'''
+print (tuple_of_floats)
+print (type(tuple_of_floats))
+print (tuple_of_floats.__sizeof__())
+print (rows*cols)
