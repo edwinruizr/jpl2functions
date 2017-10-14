@@ -30,11 +30,19 @@ print type(tiffArray) # <type 'numpy.ndarray'>
 print tiffArray.ndim # 2 = the number of axes (dimensions) of the array. In the Python world, the number of dimensions is referred to as rank.
 print tiffArray.size # 77677770  = 14695*5286 the total number of elements of the array. This is equal to the product of the elements of shape.
 print tiffArray.shape # (14695, 5286) = (rows, columns)
-# print tiffArray # remove comment to print the array
-
+#print tiffArray # remove comment to print the array
+#print tiffArray[0][0]  # top left
+#print tiffArray[14694][5285]  # bottom right
 
 noDataValueCounter = 0
 sum = 0
+
+#finds index of max value
+print numpy.where((tiffArray != noDataValue) & (tiffArray == numpy.max(tiffArray)))
+print tiffArray[0][4341]
+# second way of finding max values index
+print numpy.argwhere((tiffArray == numpy.max(tiffArray)) & (tiffArray != noDataValue))
+
 # if you do gdal info on the file opened
 # you see that size is 5286, 14695
 # i goes from 0 - 14694
@@ -51,28 +59,9 @@ for i in range(len(tiffArray)):
 
 average = sum/(tiffArray.size-noDataValueCounter)
 print 'Average = ', average
-'''
-it = numpy.nditer(tiffArray, flags=['f_index'])
-while not it.finished:
-    print "%d <%d>" % (it[0], it.index),
-    it.iternext()
 
-
-for x in numpy.nditer(tiffArray):
-    print x
-'''
 geotransform = gtif.GetGeoTransform()
 print geotransform
-
-#scanline = band.ReadRaster(xoff=0, yoff=0,
- #                          xsize=band.XSize, ysize=1,
-  #                         buf_xsize=band.XSize, buf_ysize=1,
-   #                        buf_type=gdal.GDT_Float32)
-#tuple_of_floats = struct.unpack('f' * band.XSize, scanline)
-#print tuple_of_floats
-#print len(tuple_of_floats)
-#print type(tuple_of_floats)
-
 
 '''
 # print gtif[0][0]
