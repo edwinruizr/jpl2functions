@@ -15,9 +15,42 @@ rows = gtif.RasterYSize
 bands = gtif.RasterCount
 
 band = gtif.GetRasterBand(1)
-print band
+print type(band)
 bandtype = gdal.GetDataTypeName(band.DataType)
 print bandtype
+
+# shows no data value
+print "NO DATA VALUE :", band.GetNoDataValue()
+
+# converts file opened to a numpy array
+tiffArray = numpy.array(gtif.ReadAsArray())
+print type(tiffArray)
+print tiffArray.ndim
+print tiffArray.size
+print tiffArray.shape
+#print tiffArray
+
+'''
+it = numpy.nditer(tiffArray, flags=['f_index'])
+while not it.finished:
+    print "%d <%d>" % (it[0], it.index),
+    it.iternext()
+
+
+for x in numpy.nditer(tiffArray):
+    print x
+'''
+geotransform = gtif.GetGeoTransform()
+print geotransform
+
+#scanline = band.ReadRaster(xoff=0, yoff=0,
+ #                          xsize=band.XSize, ysize=1,
+  #                         buf_xsize=band.XSize, buf_ysize=1,
+   #                        buf_type=gdal.GDT_Float32)
+#tuple_of_floats = struct.unpack('f' * band.XSize, scanline)
+#print tuple_of_floats
+#print len(tuple_of_floats)
+#print type(tuple_of_floats)
 
 
 '''
