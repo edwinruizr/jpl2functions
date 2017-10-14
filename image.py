@@ -14,22 +14,43 @@ cols = gtif.RasterXSize
 rows = gtif.RasterYSize
 bands = gtif.RasterCount
 
+
 band = gtif.GetRasterBand(1)
-print type(band)
+print type(band) # <class 'osgeo.gdal.Band'>
 bandtype = gdal.GetDataTypeName(band.DataType)
-print bandtype
+print bandtype # Float32
 
 # shows no data value
-print "NO DATA VALUE :", band.GetNoDataValue()
+print "NO DATA VALUE :", band.GetNoDataValue() # -1.0
+noDataValue = band.GetNoDataValue()
 
 # converts file opened to a numpy array
 tiffArray = numpy.array(gtif.ReadAsArray())
-print type(tiffArray)
-print tiffArray.ndim
-print tiffArray.size
-print tiffArray.shape
-#print tiffArray
+print type(tiffArray) # <type 'numpy.ndarray'>
+print tiffArray.ndim # 2 = the number of axes (dimensions) of the array. In the Python world, the number of dimensions is referred to as rank.
+print tiffArray.size # 77677770  = 14695*5286 the total number of elements of the array. This is equal to the product of the elements of shape.
+print tiffArray.shape # (14695, 5286) = (rows, columns)
+# print tiffArray # remove comment to print the array
 
+
+noDataValueCounter = 0
+sum = 0
+# if you do gdal info on the file opened
+# you see that size is 5286, 14695
+# i goes from 0 - 14694
+# j goes from 0 - 5285
+for i in range(len(tiffArray)):
+    for j in range(len(tiffArray[0])):
+        #print 'tiffArray[',i,'][',j, '] = value ',tiffArray[i][j]
+        if tiffArray[i][j] == noDataValue:
+            # need to not use # in computation
+            noDataValueCounter += 1
+        else:
+            sum += tiffArray[i][j]
+            print 'SUM: ', sum
+
+average = sum/(tiffArray.size-noDataValueCounter)
+print 'Average = ', average
 '''
 it = numpy.nditer(tiffArray, flags=['f_index'])
 while not it.finished:
