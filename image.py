@@ -7,6 +7,14 @@ import struct
 import numpy
 import sys
 
+#function that returns index of max value
+def getMaxIndex2d(openedGDALfile):
+    rasterBand = gtif.GetRasterBand(1)
+    noValue = rasterBand.GetNoDataValue()
+    tiffArray = numpy.array(openedGDALfile.ReadAsArray())
+    return numpy.where((tiffArray != noValue) & (tiffArray == numpy.max(tiffArray)))
+
+
 gtif = gdal.Open( "LRO_NAC_Slope_15m_20N010E_2mp.tif", gdal.GA_ReadOnly )
 #numpy array should have no data value
 
@@ -36,12 +44,30 @@ print tiffArray.shape # (14695, 5286) = (rows, columns)
 
 noDataValueCounter = 0
 sum = 0
+arrayOfIndexes=getMaxIndex2d(gtif)
+print 'Max value is at index [', arrayOfIndexes[0][0], '][', arrayOfIndexes[1][0], '] = ', tiffArray[arrayOfIndexes[0][0]][arrayOfIndexes[1][0]]
 
-#finds index of max value
-print numpy.where((tiffArray != noDataValue) & (tiffArray == numpy.max(tiffArray)))
-print tiffArray[0][4341]
 # second way of finding max values index
 print numpy.argwhere((tiffArray == numpy.max(tiffArray)) & (tiffArray != noDataValue))
+
+feTiffFile = gdal.Open("LP_GRS_Fe_Global_2ppd.tif",gdal.GA_ReadOnly)
+tarray = numpy.array(feTiffFile.ReadAsArray())
+indexOfMax = getMaxIndex2d(feTiffFile)
+
+geotransform = gtif.GetGeoTransform()
+if geotransform:
+    print("Origin of slope tiff = ({}, {})".format(geotransform[0], geotransform[3]))
+
+transform = feTiffFile.GetGeoTransform()
+if transform:
+    print("Origin of FE tiff file = ({}, {})".format(transform[0], transform[3]))
+
+print 'Max value of Fe Global tiff file is at index [', indexOfMax[0][0], '][', indexOfMax[1][0], '] = ', tarray[indexOfMax[0][0]][indexOfMax[1][0]]
+''''
+geotransform = gtif.GetGeoTransform()
+if geotransform:
+    print("Origin = ({}, {})".format(geotransform[0], geotransform[3]))
+    print("Pixel Size = ({}, {})".format(geotransform[1], geotransform[5]))
 
 # if you do gdal info on the file opened
 # you see that size is 5286, 14695
@@ -60,23 +86,9 @@ for i in range(len(tiffArray)):
 average = sum/(tiffArray.size-noDataValueCounter)
 print 'Average = ', average
 
-geotransform = gtif.GetGeoTransform()
-print geotransform
+'''
 
 '''
-# print gtif[0][0]
-band = gtif.GetRasterBand(1)
-print "Raster 1 x size  {0}".format(gtif.GetRasterBand(1).XSize)
-print "Raster 1 y size {0}".format(gtif.GetRasterBand(1).YSize)
-
-bandtype = gdal.GetDataTypeName(band.DataType)
-print bandtype
-data = band.ReadAsArray(0, 0, gtif.RasterXSize, gtif.RasterYSize)
-
-#print gtif
-#print gtif.GetMetadata()
-#print data
-
 # this allows GDAL to throw Python Exceptions
 print("Driver: {}/{}".format(gtif.GetDriver().ShortName,
                              gtif.GetDriver().LongName))
@@ -86,18 +98,6 @@ print("Size is {} x {} x {}".format(gtif.RasterXSize,
 print("Projection is {}".format(gtif.GetProjection()))
 geotransform = gtif.GetGeoTransform()
 
-print len(geotransform)
-print geotransform[0]
-print geotransform[1]
-print geotransform[2]
-print geotransform[3]
-print geotransform[4]
-print geotransform[5]
-
-
-if geotransform:
-    print("Origin = ({}, {})".format(geotransform[0], geotransform[3]))
-    print("Pixel Size = ({}, {})".format(geotransform[1], geotransform[5]))
 
 
 # bands data
