@@ -161,29 +161,3 @@ indexOfMin = getMinIndex2d(thTifFile)
 print 'Max value is at index [', indexOfMax[0][0], '][', indexOfMax[1][0], '] = ', thNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]
 print 'Min value is at index [', indexOfMin[0][0], '][', indexOfMin[1][0], '] = ', thNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]
 print 'Mean value is', getAverage(thTifFile)
-
-'''
-noDataValueCounter = 0
-sum = 0
-# if you do gdal info on the file opened
-# you see that size is 5286, 14695
-# i goes from 0 - 14694
-# j goes from 0 - 5285
-for i in range(len(tiffArray)):
-    for j in range(len(tiffArray[0])):
-        #print 'tiffArray[',i,'][',j, '] = value ',tiffArray[i][j]
-        if tiffArray[i][j] == noDataValue:
-            # need to not use # in computation
-            noDataValueCounter += 1
-        else:
-            sum += tiffArray[i][j]
-            print 'SUM: ', sum
-
-average = sum/(tiffArray.size-noDataValueCounter)
-print 'Average = ', average     # 6.73815232277
-'''
-'''
-proj.4
-pyproj4
-
-'''
