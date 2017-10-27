@@ -8,18 +8,45 @@ import struct
 import numpy
 import sys
 import numpy.ma as ma
+import logging
+logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s- %(message)s')
+logging.debug('Start of program')
 # FUNCTION DEFINITIONS - START
 #
 #
-#function that returns index of max value
-def getMaxIndex2d(openedGDALfile):                                          # openedGDALfile is what gets returned when you do gdal.Open()
-    rasterBand = openedGDALfile.GetRasterBand(1)                            # selects the first band (in this case the only band)
-    noValue = rasterBand.GetNoDataValue()                                   # the raster band has a function that returns the no data value
-    numpyTiffArray = numpy.array(openedGDALfile.ReadAsArray())              # convert the object returned from gdal.Open() to a numpy array
-    tiffArray = ma.masked_array(numpyTiffArray, numpyTiffArray == noValue)  # convert the numpy array to a masked array. Second parameter is the no data value so that it disregards it
-    return numpy.where(tiffArray == numpy.max(tiffArray))                   # masked array does not include the no data value into calculations so it's safe (and i tested it) to use the numpy.max function
+# function that returns an array of average, mean, median, standard deviation and variance in that order
+# the input is the tif File
+# Ex. getStatsArray("LRO_LOLA_DEM_Global_128ppd_v04.tif")
+def getStatsArray(tifFileName):
+    # Open data
+    gdalfile = gdal.Open(tifFileName)
+    logging.debug("gdalfile var is of type {}".format(type(gdalfile)))
+    # open the first raster band (in the case of the data tif files the only band)
+    banddataraster = gdalfile.GetRasterBand(1)
+    logging.debug("banddataraster var is of type {}".format(type(banddataraster)))
+    # Read raster as arrays
+    dataraster = banddataraster.ReadAsArray().astype(numpy.float)
+    logging.debug("dataraster var is of type {}".format(type(dataraster)))
+    # convert raster array to masked array disregarding the no data value in raster
+    numpymaskedarray = numpy.ma.masked_array(dataraster,  dataraster == banddataraster.GetNoDataValue())
+    logging.debug("numpymaskedarray var is of type {}".format(type(numpymaskedarray)))
+    # Calculate statistics of zonal raster and return them in an array
+    return numpy.average(numpymaskedarray),numpy.mean(numpymaskedarray),numpy.median(numpymaskedarray),numpy.std(numpymaskedarray),numpy.var(numpymaskedarray)
 
-#function that returns index of min value
+### function that returns index of max value
+### in the form of 2d array
+def getMaxIndex2d(openedGDALfile):
+    # openedGDALfile is what gets returned when you do gdal.Open()
+    rasterBand = openedGDALfile.GetRasterBand(1)
+    # convert raster band to array
+    dataraster = rasterBand.ReadAsArray().astype(numpy.float)
+    # convert to masked array. the raster band has a function that returns the no data value
+    numpymaskedarray = numpy.ma.masked_array(dataraster, dataraster == rasterBand.GetNoDataValue())
+    # return where max occurs
+    return numpy.where(numpymaskedarray == numpy.max(numpymaskedarray))
+
+### function that returns index of min value
+### same thing as getMaxIndex2d function above
 def getMinIndex2d(openedGDALfile):
     rasterBand = openedGDALfile.GetRasterBand(1)
     noValue = rasterBand.GetNoDataValue()
@@ -27,14 +54,8 @@ def getMinIndex2d(openedGDALfile):
     tiffArray = ma.masked_array(numpyTiffArray, numpyTiffArray == noValue)
     return numpy.where(tiffArray == numpy.min(tiffArray))
 
-#function that returns mean value
-def getAverage(openedGDALfile):
-    rasterBand = openedGDALfile.GetRasterBand(1)
-    noValue = rasterBand.GetNoDataValue()
-    numpyTiffArray = numpy.array(openedGDALfile.ReadAsArray())
-    tiffArray = ma.masked_array(numpyTiffArray, numpyTiffArray == noValue)
-    return tiffArray.mean()
-
+### my functions that got the relative location of point
+### need to be replace by function that converts to longitude latitude coordinates
 def getXCoordinate(indexX):
     return (indexX/128)-180
 
@@ -45,6 +66,30 @@ def getYCoordinate(indexY):
 #
 #
 #FUNCTION DEFINITIONS - END
+
+print("LRO_NAC_Slope_15m_20N010E_2mp.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
+statsArray = getStatsArray("LRO_NAC_Slope_15m_20N010E_2mp.tif")
+print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
+
+print("LP_GRS_Fe_Global_2ppd.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
+statsArray = getStatsArray("LP_GRS_Fe_Global_2ppd.tif")
+print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
+
+print("LP_GRS_H_Global_2ppd.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
+statsArray = getStatsArray("LP_GRS_H_Global_2ppd.tif")
+print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
+
+print("LP_GRS_K_Global_halfppd.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
+statsArray = getStatsArray("LP_GRS_K_Global_halfppd.tif")
+print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
+
+print("LP_GRS_Th_Global_2ppd.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
+statsArray = getStatsArray("LP_GRS_Th_Global_2ppd.tif")
+print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
+
+print("LRO_LOLA_DEM_Global_128ppd_v04.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
+statsArray = getStatsArray("LRO_LOLA_DEM_Global_128ppd_v04.tif")
+print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
 
 # OPEN TIF FILES & CONVERT THEM TO NUMPY ARRAYS
 # slope tif
@@ -57,7 +102,7 @@ feNumpyArray = numpy.array(feTiffFile.ReadAsArray())                    # conver
 
 # LOLA DEM tif
 lolademFile = gdal.Open("LRO_LOLA_DEM_Global_128ppd_v04.tif", gdal.GA_ReadOnly)
-lolaNumpyArray = numpy.array(lolademFile.ReadAsArray())
+lolaNumpyArray = numpy.array(lolademFile.ReadAsArray()).astype(numpy.float)
 
 # helium tif
 hTifFile = gdal.Open("LP_GRS_H_Global_2ppd.tif", gdal.GA_ReadOnly)
@@ -80,18 +125,11 @@ if geotransform:
     print("Pixel Size = ({}, {})".format(geotransform[1], geotransform[5]))
 
 # calculate max, min, and average for slope tif file
-arrayOfIndexes=getMaxIndex2d(slopeTifFile)
+arrayOfIndexes = getMaxIndex2d(slopeTifFile)
 arrayOfMinIndexes = getMinIndex2d(slopeTifFile)
 
-#print ('Max value is at index [', arrayOfIndexes[0][0], '][', arrayOfIndexes[1][0], '] = ', slopeNumpyArray[arrayOfIndexes[0][0]][arrayOfIndexes[1][0]])
 print ('Max value is at index [{}][{}] = {}'.format(arrayOfIndexes[0][0],arrayOfIndexes[1][0],slopeNumpyArray[arrayOfIndexes[0][0]][arrayOfIndexes[1][0]]))
 print ('Min value is at index [{}][{}] = {}'.format(arrayOfMinIndexes[0][0], arrayOfMinIndexes[1][0],slopeNumpyArray[arrayOfMinIndexes[0][0]][arrayOfMinIndexes[1][0]]))
-print ('Average value is {}'.format(getAverage(slopeTifFile)))
-
-
-
-
-
 
 # get origin and pixel size of fe tif file
 print('LP_GRS_Fe_Global_2ppd.tif')
@@ -105,9 +143,6 @@ indexOfMax = getMaxIndex2d(feTiffFile)
 indexOfMin = getMinIndex2d(feTiffFile)
 print("Max value of Fe Global tiff file is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], feNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
 print('Min value of Fe Global tiff file is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], feNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
-print('Mean value of Fe Global tiff file is {}'.format(getAverage(feTiffFile)))
-
-
 
 # get origin and pixel size of lola dem tif file
 print('LRO_LOLA_DEM_Global_128ppd_v04.tif')
@@ -119,9 +154,9 @@ if transform:
 # calculate max, min, and average for lola dem tif file
 indexOfMax = getMaxIndex2d(lolademFile)
 indexOfMin = getMinIndex2d(lolademFile)
+stdDev = getStdDeviation(lolademFile)
 print("Max value of lola dem tiff file is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], lolaNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
 print('Min value is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], lolaNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
-print('Mean value of lola dem tiff file is {}'.format(getAverage(lolademFile)))
 print("Projection is {}".format(lolademFile.GetProjection()))
 x = getXCoordinate(indexOfMax[0][0])
 y = getYCoordinate(indexOfMax[1][0])
@@ -140,11 +175,9 @@ if transform:
 # calculate max, min, and average for H tif file
 indexOfMax = getMaxIndex2d(hTifFile)
 indexOfMin = getMinIndex2d(hTifFile)
+stdDev = getStdDeviation(hTifFile)
 print("Max value is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], hNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
 print('Min value is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], hNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
-print('Mean value of H tiff file is {}'.format(getAverage(hTifFile)))
-
-
 
 
 # get origin and pixel size of K tif file
@@ -157,10 +190,9 @@ if transform:
 # calculate max, min, and average for K tif file
 indexOfMax = getMaxIndex2d(kTifFile)
 indexOfMin = getMinIndex2d(kTifFile)
+stdDev = getStdDeviation(kTifFile)
 print("Max value is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], kNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
 print('Min value is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], kNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
-print('Mean value is {}'.format(getAverage(kTifFile)))
-
 
 # get origin and pixel size of Th tif file
 print('LP_GRS_Th_Global_2ppd.tif')
@@ -174,4 +206,3 @@ indexOfMax = getMaxIndex2d(thTifFile)
 indexOfMin = getMinIndex2d(thTifFile)
 print("Max value is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], thNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
 print('Min value is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], thNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
-print('Mean value is {}'.format(getAverage(thTifFile)))
