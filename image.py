@@ -140,7 +140,9 @@ if transform:
 
 # calculate max, min, and average for fe tif file
 indexOfMax = getMaxIndex2d(feTiffFile)
+logging.debug('type of indexOfMax {}'.format(type(indexOfMax)))
 indexOfMin = getMinIndex2d(feTiffFile)
+logging.debug('type of indexOfMin {}'.format(type(indexOfMin)))
 print("Max value of Fe Global tiff file is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], feNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
 print('Min value of Fe Global tiff file is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], feNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
 
@@ -154,7 +156,6 @@ if transform:
 # calculate max, min, and average for lola dem tif file
 indexOfMax = getMaxIndex2d(lolademFile)
 indexOfMin = getMinIndex2d(lolademFile)
-stdDev = getStdDeviation(lolademFile)
 print("Max value of lola dem tiff file is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], lolaNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
 print('Min value is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], lolaNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
 print("Projection is {}".format(lolademFile.GetProjection()))
@@ -175,9 +176,9 @@ if transform:
 # calculate max, min, and average for H tif file
 indexOfMax = getMaxIndex2d(hTifFile)
 indexOfMin = getMinIndex2d(hTifFile)
-stdDev = getStdDeviation(hTifFile)
+
 print("Max value is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], hNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
-print('Min value is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], hNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
+print("Min value is at index [{}][{}] = {}".format(indexOfMin[0][0], indexOfMin[1][0], hNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
 
 
 # get origin and pixel size of K tif file
@@ -190,7 +191,6 @@ if transform:
 # calculate max, min, and average for K tif file
 indexOfMax = getMaxIndex2d(kTifFile)
 indexOfMin = getMinIndex2d(kTifFile)
-stdDev = getStdDeviation(kTifFile)
 print("Max value is at index [{}][{}] = {}".format(indexOfMax[0][0], indexOfMax[1][0], kNumpyArray[indexOfMax[0][0]][indexOfMax[1][0]]))
 print('Min value is at index [{}][{}] = {}'.format(indexOfMin[0][0], indexOfMin[1][0], kNumpyArray[indexOfMin[0][0]][indexOfMin[1][0]]))
 
