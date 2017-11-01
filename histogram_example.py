@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 import matplotlib.axes as ax
 
 mu, sigma = 20, 5
-x = mu + sigma*np.random.randn(10000)
+x = mu + sigma*np.random.randn(10)
+print(x)
 #actual data
 #x = 200, 2005
 
@@ -33,11 +34,11 @@ x = mu + sigma*np.random.randn(10000)
 #face color = what color your graph will be
 
 n, bins, patches = plt.hist(x, 10, normed=1, facecolor='blue')
-#defines limit for the x axis
-plt.xlim(xmin = 0, xmax = 20)
+#defines limit for the x axsi
+plt.xlim(xmin = 0, xmax = 40)
 
 #defines limit for y axis
-plt.ylim(ymin = 0, ymax = 1)
+plt.ylim(ymin = 0, ymax = 0.2)
 
 # add a 'best fit' line
 #y = mlab.normpdf( bins, mu, sigma)
