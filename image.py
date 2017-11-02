@@ -56,12 +56,12 @@ def getMinIndex2d(openedGDALfile):
 
 ### my functions that got the relative location of point
 ### need to be replace by function that converts to longitude latitude coordinates
-def getXCoordinate(indexX):
-    return -4838396+indexX*2
+def getXCoordinate(indexX, pixel_x, upper_left_lat):
+    return upper_left_lat+indexX*pixel_x
 
 
-def getYCoordinate(indexY):
-    return 622172-indexY*2
+def getYCoordinate(indexY, pixel_y, upper_left_lon):
+    return upper_left_lon-indexY*pixel_y
 
 def convertToLatLong(coordX,coordY):
     inProj = Proj(init='epsg:3857')
@@ -140,12 +140,12 @@ print ('Min value is at index [{}][{}] = {}'.format(arrayOfMinIndexes[0][0], arr
 
 # test coordinate getter
 #returns upper left (0,0)
-print (getXCoordinate(0))
-print (getYCoordinate(0))
+print (getXCoordinate(0, geotransform[1], geotransform[0]))
+print (getYCoordinate(0, geotransform[5], geotransform[3]))
 
 #returns lower right (5286,14695)
-print (getXCoordinate(5286))
-print (getYCoordinate(14695))
+print (getXCoordinate(5286, geotransform[1], geotransform[0]))
+print (getYCoordinate(14695, geotransform[5], geotransform[3]))
 
 convertToLatLong(-4838396, 622172)
 
