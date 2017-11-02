@@ -3,7 +3,7 @@ from osgeo import ogr
 from osgeo import osr
 from osgeo import gdal_array
 from osgeo import gdalconst
-import pyproj
+from pyproj import Proj, transform
 import struct
 import numpy
 import sys
@@ -57,12 +57,19 @@ def getMinIndex2d(openedGDALfile):
 
 ### my functions that got the relative location of point
 ### need to be replace by function that converts to longitude latitude coordinates
-def getXCoordinate(indexX):
-    return (indexX/128)-180
+def getXCoordinate(indexX, pixel_x, upper_left_lat):
+    return upper_left_lat+indexX*pixel_x
 
 
-def getYCoordinate(indexY):
-    return (indexY/128)-90*-1
+def getYCoordinate(indexY, pixel_y, upper_left_lon):
+    return upper_left_lon-indexY*pixel_y
+
+def convertToLatLong(coordX,coordY):
+    inProj = Proj(init='epsg:3857')
+    outProj = Proj(init='epsg:4326')
+    x1,y1 = coordX,coordY
+    x2,y2 = transform(inProj,outProj,x1,y1)
+    print (x2,y2)
 
 
 def printFile(openedGDALfile):
@@ -80,6 +87,7 @@ def printFile(openedGDALfile):
 # print("LRO_NAC_Slope_15m_20N010E_2mp.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
 # statsArray = getStatsArray("LRO_NAC_Slope_15m_20N010E_2mp.tif")
 # print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
+
 
 # print("LP_GRS_Fe_Global_2ppd.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
 # statsArray = getStatsArray("LP_GRS_Fe_Global_2ppd.tif")
@@ -101,14 +109,16 @@ def printFile(openedGDALfile):
 # statsArray = getStatsArray("LRO_LOLA_DEM_Global_128ppd_v04.tif")
 # print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
 
+
 # OPEN TIF FILES & CONVERT THEM TO NUMPY ARRAYS
 # slope tif
 slopeTifFile = gdal.Open( "LRO_NAC_Slope_15m_20N010E_2mp.tif", gdal.GA_ReadOnly )
 slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
 
 # iron tif
-feTiffFile = gdal.Open("LP_GRS_Fe_Global_2ppd.tif",gdal.GA_ReadOnly)
-feNumpyArray = numpy.array(feTiffFile.ReadAsArray())                    # converts file opened to a numpy array
+#feTiffFile = gdal.Open("LP_GRS_Fe_Global_2ppd.tif",gdal.GA_ReadOnly)
+#feNumpyArray = numpy.array(feTiffFile.ReadAsArray())                    # converts file opened to a numpy array
+
 
 # # LOLA DEM tif
 # lolademFile = gdal.Open("LRO_LOLA_DEM_Global_128ppd_v04.tif", gdal.GA_ReadOnly)
@@ -141,6 +151,7 @@ arrayOfMinIndexes = getMinIndex2d(slopeTifFile)
 print ('Max value is at index [{}][{}] = {}'.format(arrayOfIndexes[0][0],arrayOfIndexes[1][0],slopeNumpyArray[arrayOfIndexes[0][0]][arrayOfIndexes[1][0]]))
 print()
 print ('Min value is at index [{}][{}] = {}'.format(arrayOfMinIndexes[0][0], arrayOfMinIndexes[1][0],slopeNumpyArray[arrayOfMinIndexes[0][0]][arrayOfMinIndexes[1][0]]))
+
 print()
 print(geotransform[2])
 print(geotransform[0])
