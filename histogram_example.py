@@ -34,7 +34,7 @@ print(x)
 #n, bins, patches = plt.hist(x, 50, normed=1, facecolor='green', alpha=0.75)
 #face color = what color your graph will be
 
-n, bins, patches = plt.hist(x, 10, normed=1, range = 1, facecolor='blue')
+n, bins, patches = plt.hist(x, 10, normed=1, facecolor='blue')
 #defines limit for the x axsi
 plt.xlim(xmin = 0, xmax = 40)
 
