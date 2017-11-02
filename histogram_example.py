@@ -24,7 +24,8 @@ import matplotlib.pyplot as plt
 import matplotlib.axes as ax
 
 mu, sigma = 20, 5
-x = mu + sigma*np.random.randn(10)
+#x = mu + sigma*np.random.randn(10)
+x = [1,2,3,4,5,6,6,7,8,9,1,11,12,12,13]
 print(x)
 #actual data
 #x = 200, 2005
@@ -33,7 +34,7 @@ print(x)
 #n, bins, patches = plt.hist(x, 50, normed=1, facecolor='green', alpha=0.75)
 #face color = what color your graph will be
 
-n, bins, patches = plt.hist(x, 10, normed=1, facecolor='blue')
+n, bins, patches = plt.hist(x, 10, normed=1, range = 1, facecolor='blue')
 #defines limit for the x axsi
 plt.xlim(xmin = 0, xmax = 40)
 
