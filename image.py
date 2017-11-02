@@ -64,7 +64,8 @@ def getYCoordinate(indexY, pixel_y, upper_left_lon):
     return upper_left_lon-indexY*pixel_y
 
 def convertToLatLong(coordX,coordY):
-    inProj = Proj(init='epsg:3857')
+#    inProj = Proj(init='epsg:4326')
+    inProj = Proj('+proj=eqc +lat_ts=20 +lat_0=0 +lon_0=180 +x_0=0 +y_0=0 +a=1737400 +b=1737400 +units=m +no_defs ')
     outProj = Proj(init='epsg:4326')
     x1,y1 = coordX,coordY
     x2,y2 = transform(inProj,outProj,x1,y1)
@@ -101,6 +102,7 @@ print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray
 # OPEN TIF FILES & CONVERT THEM TO NUMPY ARRAYS
 # slope tif
 slopeTifFile = gdal.Open( "LRO_NAC_Slope_15m_20N010E_2mp.tif", gdal.GA_ReadOnly )
+#slopeTifFile = gdal.Open( "test2.tif", gdal.GA_ReadOnly )
 slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
 
 # iron tif
@@ -147,7 +149,8 @@ print (getYCoordinate(0, geotransform[5], geotransform[3]))
 print (getXCoordinate(5286, geotransform[1], geotransform[0]))
 print (getYCoordinate(14695, geotransform[5], geotransform[3]))
 
-convertToLatLong(-4838396, 622172)
+print("convert lat to long")
+convertToLatLong(geotransform[0], geotransform[3])
 
 # get origin and pixel size of fe tif file
 #print('LP_GRS_Fe_Global_2ppd.tif')
