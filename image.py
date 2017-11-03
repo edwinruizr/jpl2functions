@@ -9,6 +9,9 @@ import numpy
 import sys
 import numpy.ma as ma
 import logging
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
+import matplotlib.axes as ax
 
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s- %(message)s')
 logging.debug('Start of program')
@@ -77,6 +80,8 @@ def convertToLatLong(coordX,coordY, gdalFile):
     return transform(inProj,outProj,coordX,coordY)
 
 
+
+    
 #
 #
 #FUNCTION DEFINITIONS - END
@@ -111,6 +116,17 @@ slopeTifFile = gdal.Open( "LRO_NAC_Slope_15m_20N010E_2mp.tif", gdal.GA_ReadOnly 
 #slopeTifFile = gdal.Open( "test2.tif", gdal.GA_ReadOnly )
 slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
 
+temp_slope = slopeNumpyArray.flatten()
+print(len(temp_slope))
+n, bins, patches = plt.hist(temp_slope, 50, normed = 1, facecolor = 'blue')
+plt.title('Histogram for Slope')
+plt.xlabel('Frequency')
+plt.ylabel('value')
+plt.grid(True)
+plt.show()
+        
+
+print(slopeNumpyArray)
 # iron tif
 #feTiffFile = gdal.Open("LP_GRS_Fe_Global_2ppd.tif",gdal.GA_ReadOnly)
 #feNumpyArray = numpy.array(feTiffFile.ReadAsArray())                    # converts file opened to a numpy array
