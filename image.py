@@ -91,7 +91,7 @@ def convertToLatLong(coordX,coordY, gdalFile):
 #
 #FUNCTION DEFINITIONS - END
 
-print("LRO_NAC_Slope_15m_20N010E_2mp.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
+#print("LRO_NAC_Slope_15m_20N010E_2mp.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
 #statsArray = getStatsArray("LRO_NAC_Slope_15m_20N010E_2mp.tif")
 #print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
 
@@ -117,14 +117,23 @@ print("LRO_NAC_Slope_15m_20N010E_2mp.tif\naverage \t\tmean \t\tmedian \t\tstd de
 
 # OPEN TIF FILES & CONVERT THEM TO NUMPY ARRAYS
 # slope tif
-slopeTifFile = gdal.Open( "LRO_NAC_Slope_15m_20N010E_2mp.tif", gdal.GA_ReadOnly )
+tif_file = "LRO_NAC_Slope_15m_20N010E_2mp.tif"
+#slopeTifFile = gdal.Open( tif_file, gdal.GA_ReadOnly )
 #slopeTifFile = gdal.Open( "test2.tif", gdal.GA_ReadOnly )
-slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
-stuff = gr.from_file("LRO_NAC_Slope_15m_20N010E_2mp.tif")
+#slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
+
+#reads it in as georasters then convert it to pandas
+stuff = gr.from_file(tif_file)
 df = stuff.to_pandas()
 
 #df = gpd.read_file(slopeNumpyArray)
-print(df)
+
+#print first 5 lines in data frame
+print(df.head())
+
+#prints the dataframe value every 10000
+print(df['value'][::10000])
+
 
 # print("slope numpy array", slopeNumpyArray)
 # print(slopeNumpyArray.shape)
