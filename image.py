@@ -13,6 +13,11 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import matplotlib.axes as ax
 
+import pandas as pd
+import geopandas as gpd
+import georasters as gr
+
+
 logging.basicConfig(level=logging.DEBUG, format=' %(asctime)s - %(levelname)s- %(message)s')
 logging.debug('Start of program')
 # FUNCTION DEFINITIONS - START
@@ -87,8 +92,8 @@ def convertToLatLong(coordX,coordY, gdalFile):
 #FUNCTION DEFINITIONS - END
 
 print("LRO_NAC_Slope_15m_20N010E_2mp.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
-statsArray = getStatsArray("LRO_NAC_Slope_15m_20N010E_2mp.tif")
-print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
+#statsArray = getStatsArray("LRO_NAC_Slope_15m_20N010E_2mp.tif")
+#print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
 
 #print("LP_GRS_Fe_Global_2ppd.tif\naverage \t\tmean \t\tmedian \t\tstd deviation \t\tvariance")
 #statsArray = getStatsArray("LP_GRS_Fe_Global_2ppd.tif")
@@ -115,8 +120,17 @@ print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray
 slopeTifFile = gdal.Open( "LRO_NAC_Slope_15m_20N010E_2mp.tif", gdal.GA_ReadOnly )
 #slopeTifFile = gdal.Open( "test2.tif", gdal.GA_ReadOnly )
 slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
+stuff = gr.from_file("LRO_NAC_Slope_15m_20N010E_2mp.tif")
+df = stuff.to_pandas()
 
+#df = gpd.read_file(slopeNumpyArray)
+print(df)
 
+# print("slope numpy array", slopeNumpyArray)
+# print(slopeNumpyArray.shape)
+# print("type of file", type(slopeTifFile))
+# print("type of file for numpy array", type(slopeNumpyArray))
+# print("max", numpy.max(slopeNumpyArray))
 
 # temp_slope = slopeNumpyArray.flatten()
 # print(len(temp_slope))
@@ -150,34 +164,46 @@ slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # conver
 #thNumpyArray  = numpy.array(thTifFile.ReadAsArray())
 
 
+
+
+
+
+
+
 # get origin and pixel size of slope tif file
-print('LRO_NAC_Slope_15m_20N010E_2mp.tif')
-geotransform = slopeTifFile.GetGeoTransform()
+# print('LRO_NAC_Slope_15m_20N010E_2mp.tif')
+# geotransform = slopeTifFile.GetGeoTransform()
 
-if geotransform:
-    print("Origin of slope tiff = ({}, {})".format(geotransform[0], geotransform[3]))
-    print("Pixel Size = ({}, {})".format(geotransform[1], geotransform[5]))
+# if geotransform:
+#     print("Origin of slope tiff = ({}, {})".format(geotransform[0], geotransform[3]))
+#     print("Pixel Size = ({}, {})".format(geotransform[1], geotransform[5]))
 
-# calculate max, min, and average for slope tif file
-arrayOfIndexes = getMaxIndex2d(slopeTifFile)
-arrayOfMinIndexes = getMinIndex2d(slopeTifFile)
+# # calculate max, min, and average for slope tif file
+# arrayOfIndexes = getMaxIndex2d(slopeTifFile)
+# arrayOfMinIndexes = getMinIndex2d(slopeTifFile)
 
-print ('Max value is at index [{}][{}] = {}'.format(arrayOfIndexes[0][0],arrayOfIndexes[1][0],slopeNumpyArray[arrayOfIndexes[0][0]][arrayOfIndexes[1][0]]))
-print ('Min value is at index [{}][{}] = {}'.format(arrayOfMinIndexes[0][0], arrayOfMinIndexes[1][0],slopeNumpyArray[arrayOfMinIndexes[0][0]][arrayOfMinIndexes[1][0]]))
+# print ('Max value is at index [{}][{}] = {}'.format(arrayOfIndexes[0][0],arrayOfIndexes[1][0],slopeNumpyArray[arrayOfIndexes[0][0]][arrayOfIndexes[1][0]]))
+# print ('Min value is at index [{}][{}] = {}'.format(arrayOfMinIndexes[0][0], arrayOfMinIndexes[1][0],slopeNumpyArray[arrayOfMinIndexes[0][0]][arrayOfMinIndexes[1][0]]))
 
-# test coordinate getter
-#returns upper left (0,0)
-print (getXCoordinate(0, geotransform[1], geotransform[0]))
-print (getYCoordinate(0, geotransform[5], geotransform[3]))
+# # test coordinate getter
+# #returns upper left (0,0)
+# print (getXCoordinate(0, geotransform[1], geotransform[0]))
+# print (getYCoordinate(0, geotransform[5], geotransform[3]))
 
-#returns lower right (5286,14695)
-print (getXCoordinate(5286, geotransform[1], geotransform[0]))
-print (getYCoordinate(14695, geotransform[5], geotransform[3]))
+# #returns lower right (5286,14695)
+# print (getXCoordinate(5286, geotransform[1], geotransform[0]))
+# print (getYCoordinate(14695, geotransform[5], geotransform[3]))
 
-convertToLatLong(geotransform[0], geotransform[3],slopeTifFile)
+# convertToLatLong(geotransform[0], geotransform[3],slopeTifFile)
 
-x2,y2 = convertToLatLong(-4838396, 622172, slopeTifFile)
-print("({},{})".format(x2,y2))
+# x2,y2 = convertToLatLong(-4838396, 622172, slopeTifFile)
+# print("({},{})".format(x2,y2))
+
+
+
+
+
+
 
 # get origin and pixel size of fe tif file
 #print('LP_GRS_Fe_Global_2ppd.tif')
