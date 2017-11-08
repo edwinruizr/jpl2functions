@@ -118,6 +118,7 @@ def convertToLatLong(coordX,coordY, gdalFile):
 # OPEN TIF FILES & CONVERT THEM TO NUMPY ARRAYS
 # slope tif
 tif_file = "LRO_NAC_Slope_15m_20N010E_2mp.tif"
+tif_file2 = "LP_GRS_Th_Global_2ppd.tif"
 #slopeTifFile = gdal.Open( tif_file, gdal.GA_ReadOnly )
 #slopeTifFile = gdal.Open( "test2.tif", gdal.GA_ReadOnly )
 #slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
@@ -126,13 +127,19 @@ tif_file = "LRO_NAC_Slope_15m_20N010E_2mp.tif"
 stuff = gr.from_file(tif_file)
 df = stuff.to_pandas()
 
+stuff2 = gr.from_file(tif_file2)
+df2 = stuff2.to_pandas()
+
+
+
 #df = gpd.read_file(slopeNumpyArray)
 
 #print first 5 lines in data frame
 print(df.head())
 
+print(df2.head())
 #prints the dataframe value every 10000
-print(df['value'][::10000])
+#print(df['value'][::10000])
 
 
 # print("slope numpy array", slopeNumpyArray)
