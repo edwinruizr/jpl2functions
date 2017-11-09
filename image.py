@@ -119,26 +119,66 @@ def convertToLatLong(coordX,coordY, gdalFile):
 # slope tif
 tif_file = "LRO_NAC_Slope_15m_20N010E_2mp.tif"
 tif_file2 = "LP_GRS_Th_Global_2ppd.tif"
+
+xyz_file = "temp_avg_hour00.xyz"
 #slopeTifFile = gdal.Open( tif_file, gdal.GA_ReadOnly )
 #slopeTifFile = gdal.Open( "test2.tif", gdal.GA_ReadOnly )
 #slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
 
 #reads it in as georasters then convert it to pandas
-stuff = gr.from_file(tif_file)
-df = stuff.to_pandas()
+# stuff = gr.from_file(tif_file)
+# df = stuff.to_pandas()
 
-stuff2 = gr.from_file(tif_file2)
-df2 = stuff2.to_pandas()
+# stuff2 = gr.from_file(tif_file2)
+# df2 = stuff2.to_pandas()
 
+
+#reads in xyz file
+# names = ['lat', 'lon', 'temp(k)']
+xyz = pd.read_csv(xyz_file, header = None)
+print("xyz file \n", xyz.head())
+print(type(xyz))
+
+
+# print(xyz.values[:5])
+#this works
+#tempstuff = str(numpy.split(xyz.values[:5], 1)[0][0]).split("['")[1].split("']")[0].split("  ")
+tempstuff = str(numpy.split(xyz.values, 1)[0][0]).split("['")[1].split("']")[0].split("  ")
+print(tempstuff)
+newarray = []
+for t in tempstuff:
+    newarray.append(numpy.float32(t))
+print("new array", newarray)
+#print(str(xyz.values[0]).split("  "))
+# print(str(xyz.values[:]).split("[\' ")[1].split("\']")[0].split("  "))
+# dataframe = pd.DataFrame(str(xyz.values[:]).split("[\' ")[1].split("\']")[0].split("  "))
+# dataframe = pd.DataFrame(str(xyz.values[0]).split("[\'"))
+#print(dataframe.head())
+
+
+
+# tester = pd.DataFrame(xyz.values[:5])
+
+
+# print("tester ", tester)
+
+
+
+
+
+# temp = numpy.loadtxt(xyz_file, dtype=str, delimiter = " ")
+# print(temp)
 
 
 #df = gpd.read_file(slopeNumpyArray)
 
 #print first 5 lines in data frame
 
-print("slope\n", df.head())
+# print("slope\n", df.head())
 
-print("th global\n", df2.head())
+# print("th global\n", df2.head())
+
+
 #prints the dataframe value every 10000
 #print(df['value'][::10000])
 
