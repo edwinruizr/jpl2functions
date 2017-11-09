@@ -135,9 +135,10 @@ df2 = stuff2.to_pandas()
 #df = gpd.read_file(slopeNumpyArray)
 
 #print first 5 lines in data frame
-print(df.head())
 
-print(df2.head())
+print("slope\n", df.head())
+
+print("th global\n", df2.head())
 #prints the dataframe value every 10000
 #print(df['value'][::10000])
 
