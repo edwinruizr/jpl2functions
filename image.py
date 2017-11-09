@@ -118,7 +118,7 @@ slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # conver
 
 temp_slope = slopeNumpyArray.flatten()
 print(len(temp_slope))
-n, bins, patches = plt.hist(temp_slope, 50, normed = 1, facecolor = 'blue')
+n, bins, patches = plt.hist(temp_slope, 50, facecolor = 'blue')
 plt.title('Histogram for Slope')
 plt.xlabel('Frequency')
 plt.ylabel('value')
