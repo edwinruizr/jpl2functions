@@ -81,7 +81,7 @@ def convertToLatLong(coordX,coordY, gdalFile):
 
 
 
-    
+
 #
 #
 #FUNCTION DEFINITIONS - END
@@ -118,14 +118,14 @@ slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # conver
 
 temp_slope = slopeNumpyArray.flatten()
 print(len(temp_slope))
-n, bins, patches = plt.hist(temp_slope, 50, facecolor = 'blue')
+n, bins, patches = plt.hist(temp_slope, 50, facecolor = 'blue', edgecolor='black', linewidth=1.0)
 plt.title('Histogram for Slope')
 plt.ylabel('Frequency')
 plt.xlabel('value')
 plt.grid(True)
 plt.xlim(0, 90)
 plt.show()
-        
+
 
 print(slopeNumpyArray)
 # iron tif
