@@ -115,71 +115,49 @@ def convertToLatLong(coordX,coordY, gdalFile):
 #statsArray = getStatsArray("LRO_LOLA_DEM_Global_128ppd_v04.tif")
 #print("{} \t\t{} \t{} \t{} \t\t{}".format(statsArray[0],statsArray[1],statsArray[2],statsArray[3],statsArray[4]))
 
-# OPEN TIF FILES & CONVERT THEM TO NUMPY ARRAYS
+# OPEN TIF FILES & CONVERT THEM TO NUMPY ARRAYS OR DATAFRAMES
 # slope tif
 tif_file = "LRO_NAC_Slope_15m_20N010E_2mp.tif"
 tif_file2 = "LP_GRS_Th_Global_2ppd.tif"
-
+#xyz_file
 xyz_file = "temp_avg_hour00.xyz"
-#slopeTifFile = gdal.Open( tif_file, gdal.GA_ReadOnly )
-#slopeTifFile = gdal.Open( "test2.tif", gdal.GA_ReadOnly )
+# slopeTifFile = gdal.Open( tif_file, gdal.GA_ReadOnly )
+# slopeTifFile = gdal.Open( tif_file2, gdal.GA_ReadOnly )
 #slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
 
 #reads it in as georasters then convert it to pandas
-# stuff = gr.from_file(tif_file)
-# df = stuff.to_pandas()
+stuff = gr.from_file(tif_file)
+df = stuff.to_pandas()
+print("slope dataframe.head and shape")
+print(df.head())
+print(df.shape)
 
-# stuff2 = gr.from_file(tif_file2)
-# df2 = stuff2.to_pandas()
-
+stuff2 = gr.from_file(tif_file2)
+df2 = stuff2.to_pandas()
+print("th global dataframe and shape")
+print(df2.head())
+print(df2.shape)
 
 #reads in xyz file
-# names = ['lat', 'lon', 'temp(k)']
-xyz = pd.read_csv(xyz_file, header = None)
-print("xyz file \n", xyz.head())
-print(type(xyz))
+xyz_file = numpy.loadtxt(xyz_file, dtype= 'str')
+names = ['Longtitude', 'Latitude', 'Temp(k)']
+xyz_dataframe = pd.DataFrame(xyz_file)
+xyz_dataframe.columns = names
 
+print("xyz dataframe and shape")
+print(xyz_dataframe.head())
+print(xyz_dataframe.shape)
 
-# print(xyz.values[:5])
-#this works
-#tempstuff = str(numpy.split(xyz.values[:5], 1)[0][0]).split("['")[1].split("']")[0].split("  ")
-tempstuff = str(numpy.split(xyz.values, 1)[0][0]).split("['")[1].split("']")[0].split("  ")
-print(tempstuff)
-newarray = []
-for t in tempstuff:
-    newarray.append(numpy.float32(t))
-print("new array", newarray)
-#print(str(xyz.values[0]).split("  "))
-# print(str(xyz.values[:]).split("[\' ")[1].split("\']")[0].split("  "))
-# dataframe = pd.DataFrame(str(xyz.values[:]).split("[\' ")[1].split("\']")[0].split("  "))
-# dataframe = pd.DataFrame(str(xyz.values[0]).split("[\'"))
-#print(dataframe.head())
+# df = gpd.read_file(slopeNumpyArray)
 
-
-
-# tester = pd.DataFrame(xyz.values[:5])
-
-
-# print("tester ", tester)
-
-
-
-
-
-# temp = numpy.loadtxt(xyz_file, dtype=str, delimiter = " ")
-# print(temp)
-
-
-#df = gpd.read_file(slopeNumpyArray)
-
-#print first 5 lines in data frame
+# #print first 5 lines in data frame
 
 # print("slope\n", df.head())
 
 # print("th global\n", df2.head())
 
 
-#prints the dataframe value every 10000
+#Prints the dataframe value every 10000
 #print(df['value'][::10000])
 
 
@@ -197,7 +175,6 @@ print("new array", newarray)
 # plt.ylabel('value')
 # plt.grid(True)
 # plt.show()
-        
 
 
 # iron tif
