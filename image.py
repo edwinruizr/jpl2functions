@@ -125,18 +125,18 @@ xyz_file = "temp_avg_hour00.xyz"
 # slopeTifFile = gdal.Open( tif_file2, gdal.GA_ReadOnly )
 #slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
 
-#reads it in as georasters then convert it to pandas
-stuff = gr.from_file(tif_file)
-df = stuff.to_pandas()
-print("slope dataframe.head and shape")
-print(df.head())
-print(df.shape)
+# #reads it in as georasters then convert it to pandas
+# stuff = gr.from_file(tif_file)
+# df = stuff.to_pandas()
+# print("slope dataframe.head and shape")
+# print(df.head())
+# print(df.shape)
 
-stuff2 = gr.from_file(tif_file2)
-df2 = stuff2.to_pandas()
-print("th global dataframe and shape")
-print(df2.head())
-print(df2.shape)
+# stuff2 = gr.from_file(tif_file2)
+# df2 = stuff2.to_pandas()
+# print("th global dataframe and shape")
+# print(df2.head())
+# print(df2.shape)
 
 #reads in xyz file
 xyz_file = numpy.loadtxt(xyz_file, dtype= 'str')
@@ -147,6 +147,11 @@ xyz_dataframe.columns = names
 print("xyz dataframe and shape")
 print(xyz_dataframe.head())
 print(xyz_dataframe.shape)
+temp = xyz_dataframe['Temp(k)']
+print(temp[:5])
+
+
+
 
 # df = gpd.read_file(slopeNumpyArray)
 
