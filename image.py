@@ -76,6 +76,16 @@ def convertToLatLong(coordX,coordY, gdalFile):
     outProj = Proj(init='epsg:4326')
     return transform(inProj,outProj,coordX,coordY)
 
+def convertToDecDeg(coordX,coordY, gdalFile):
+    inSRS_wkt = gdalFile.GetProjection()  # gives SRS in WKT
+    logging.debug(inSRS_wkt)
+    inSRS_converter = osr.SpatialReference()  # makes an empty spatial ref object
+    inSRS_converter.ImportFromWkt(inSRS_wkt)  # populates the spatial ref object with our WKT SRS
+    inSRS_forPyProj = inSRS_converter.ExportToProj4()  # Exports an SRS ref as a Proj4 string usable by PyProj
+    inProj = Proj(init='epsg:4326')
+    outProj = Proj(inSRS_forPyProj)
+    logging.debug(inSRS_forPyProj)
+    return transform(inProj,outProj,coordX,coordY)
 
 #
 #
