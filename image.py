@@ -128,10 +128,10 @@ def convertToDecDeg(coordX,coordY, gdalFile):
 # OPEN TIF FILES & CONVERT THEM TO NUMPY ARRAYS OR DATAFRAMES
 # slope tif
 tif_file = "LRO_NAC_Slope_15m_20N010E_2mp.tif"
-tif_file2 = "LP_GRS_Th_Global_2ppd.tif"
-#xyz_file
-xyz_file = "temp_avg_hour00.xyz"
-# slopeTifFile = gdal.Open( tif_file, gdal.GA_ReadOnly )
+# tif_file2 = "LP_GRS_Th_Global_2ppd.tif"
+# #xyz_file
+# xyz_file = "temp_avg_hour00.xyz"
+slopeTifFile = gdal.Open( tif_file, gdal.GA_ReadOnly )
 # slopeTifFile = gdal.Open( tif_file2, gdal.GA_ReadOnly )
 #slopeNumpyArray = numpy.array(slopeTifFile.ReadAsArray())               # converts file opened to a numpy array
 
@@ -149,16 +149,16 @@ xyz_file = "temp_avg_hour00.xyz"
 # print(df2.shape)
 
 #reads in xyz file
-xyz_file = numpy.loadtxt(xyz_file, dtype= 'str')
-names = ['Longtitude', 'Latitude', 'Temp(k)']
-xyz_dataframe = pd.DataFrame(xyz_file)
-xyz_dataframe.columns = names
+# xyz_file = numpy.loadtxt(xyz_file, dtype= 'str')
+# names = ['Longtitude', 'Latitude', 'Temp(k)']
+# xyz_dataframe = pd.DataFrame(xyz_file)
+# xyz_dataframe.columns = names
 
-print("xyz dataframe and shape")
-print(xyz_dataframe.head())
-print(xyz_dataframe.shape)
-temp = xyz_dataframe['Temp(k)']
-print(temp[:5])
+# print("xyz dataframe and shape")
+# print(xyz_dataframe.head())
+# print(xyz_dataframe.shape)
+# temp = xyz_dataframe['Temp(k)']
+# print(temp[:5])
 
 
 
@@ -221,7 +221,7 @@ print(temp[:5])
 
 # get origin and pixel size of slope tif file
 # print('LRO_NAC_Slope_15m_20N010E_2mp.tif')
-# geotransform = slopeTifFile.GetGeoTransform()
+geotransform = slopeTifFile.GetGeoTransform()
 
 # if geotransform:
 #     print("Origin of slope tiff = ({}, {})".format(geotransform[0], geotransform[3]))
@@ -243,7 +243,7 @@ print(temp[:5])
 # print (getXCoordinate(5286, geotransform[1], geotransform[0]))
 # print (getYCoordinate(14695, geotransform[5], geotransform[3]))
 
-# convertToLatLong(geotransform[0], geotransform[3],slopeTifFile)
+convertToLatLong(geotransform[0], geotransform[3],slopeTifFile)
 
 # x2,y2 = convertToLatLong(-4838396, 622172, slopeTifFile)
 # print("({},{})".format(x2,y2))
