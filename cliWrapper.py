@@ -117,7 +117,105 @@ def visualizeCovariance(listOfDataframes, norm = False):
     plt.show()
 
 
+def logVsLog(element1, element2):
+    element1Value = ""
+    element2Value = ""
+    for key in element1.keys():
+        if key != 'x' and key!='y':
+            element1Value = key
+
+    for key in element2.keys():
+        if key != 'x' and key!='y':
+            element2Value = key
+
+    xRange_e1 = element1['x'].max() - element1['x'].min()
+    yRange_e1 = element1['y'].max() - element1['y'].min()
+
+    section_e1 = math.ceil(xRange_e1/10)         #Manually put 10 to have 10 x 10 matrix
+    ySection_e1 = math.ceil(yRange_e1/10)
+
+    min_e1 = element1['x'].min()
+    max_e1 = element1['x'].max()
+
+    ymin_e1 = element1['y'].min()
+    ymax_e1 = element1['y'].max()
+
+    d={}
+    for x in range(0,10):
+        for y in range(0,10):
+            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
+
+    # Will contain the log(standard deviation) of each value in the 10x10 matrix (Using this for scatterplot)
+    fe_log_arr = []
+    for key, value in d.items():
+        fe_key_std = numpy.std(d[key][element1Value])
+        fe_key_log = numpy.log(fe_key_std)
+        fe_log_arr.append(fe_key_log)
+
+
+    xRange_e2 = element2['x'].max() - element2['x'].min()
+    yRange_e2 = element2['y'].max() - element2['y'].min()
+
+    section_e2 = math.ceil(xRange_e2/10)
+    ySection_e2 = math.ceil(yRange_e2/10)
+
+    min_e2 = element2['x'].min()
+    max_e2 = element2['x'].max()
+
+    ymin_e2 = element2['y'].min()
+    ymax_e2 = element2['y'].max()
+
+    h_d={}
+    for x in range(0,10):
+        for y in range(0,10):
+            h_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['x']) & (element2['x'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['y']) & (element2['y'] < ymin_e2+(y+1)*ySection_e2)]
+
+    h_log_arr = []
+    for key, value in h_d.items():
+        h_key_std = numpy.std(h_d[key][element2Value])
+        h_key_log = numpy.log(h_key_std)
+        h_log_arr.append(h_key_log)
+
+    plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
+    plt.xlabel(r'$('+element1Value+')\ \log(\sigma_2)$')
+    plt.ylabel(r'$('+element2Value+')\ \log(\sigma_1)$')
+    # plt(x,y) -> plt(hydrogen, iron) since first element should be on y axis and second element on x axis based on visualization paper
+    plt.scatter(h_log_arr, fe_log_arr)
+    plt.show()
+
+    fe = element1.corr()
+    h = element2.corr()
+
+    iron = fe[element1Value]
+    hydrogen = h[element2Value]
+
+    correlation = numpy.corrcoef(fe, h)
+
+    # This loops through the correlation matrix and puts all the points into a single array.
+    corr_d=[]
+    for x in range(0, len(correlation)):
+        for y in range(0, len(correlation)):
+            corr_d.append(correlation[x][y])
+
+    d={}
+    for x in range(0,6):
+        for y in range(0,6):
+            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
+
+    # Will contain the log(standard deviation) of each value in the 10x10 matrix (Using this for scatterplot)
+    fe_log_arr = []
+    for key, value in d.items():
+        fe_key_std = numpy.std(d[key][element1Value])
+        fe_key_log = numpy.log(fe_key_std)
+        fe_log_arr.append(fe_key_log)
+
+    plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
+    plt.scatter(corr_d, fe_log_arr)
+    plt.show()
 ## END OF FUNCTIONS
+
 
 questions = [
              inquirer.Checkbox('Layers',
@@ -136,7 +234,7 @@ for answer in answers['Layers']:
 
 
 if len(df) == 2:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot', 'Log Graph']
 # chose multiple layers
 elif len(df) > 1:
     choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices']
@@ -205,7 +303,8 @@ if 'Scatter Plot' in respuesta['Analysis']:
     plot(dataframe.sample(n=2000),names[answers['Layers'][0]],names[answers['Layers'][1]])
     # print(LA.eig(dataframe.as_matrix()))
 
-
+if 'Log Graph' in respuesta['Analysis']:
+    logVsLog(df[0], df[1])
 
 
 ## clustering and covariance matrices functions need to be inserted
