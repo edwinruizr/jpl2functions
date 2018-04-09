@@ -117,9 +117,11 @@ def visualizeCovariance(listOfDataframes, norm = False):
     plt.show()
 
 
-def logVsLog(element1, element2):
+def logAndCorrelation(element1, element2, element3, length):
     element1Value = ""
     element2Value = ""
+    element3Value = ""
+
     for key in element1.keys():
         if key != 'x' and key!='y':
             element1Value = key
@@ -128,11 +130,15 @@ def logVsLog(element1, element2):
         if key != 'x' and key!='y':
             element2Value = key
 
+    for key in element3.keys():
+        if key!= 'x' and key!='y':
+            element3Value = key
+
     xRange_e1 = element1['x'].max() - element1['x'].min()
     yRange_e1 = element1['y'].max() - element1['y'].min()
 
-    section_e1 = math.ceil(xRange_e1/10)         #Manually put 10 to have 10 x 10 matrix
-    ySection_e1 = math.ceil(yRange_e1/10)
+    section_e1 = math.ceil(xRange_e1/length)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/length)
 
     min_e1 = element1['x'].min()
     max_e1 = element1['x'].max()
@@ -140,24 +146,24 @@ def logVsLog(element1, element2):
     ymin_e1 = element1['y'].min()
     ymax_e1 = element1['y'].max()
 
-    d={}
-    for x in range(0,10):
-        for y in range(0,10):
-            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
+    e1_d={}
+    for x in range(0,length):
+        for y in range(0,length):
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
 
-    # Will contain the log(standard deviation) of each value in the 10x10 matrix (Using this for scatterplot)
-    fe_log_arr = []
-    for key, value in d.items():
-        fe_key_std = numpy.std(d[key][element1Value])
-        fe_key_log = numpy.log(fe_key_std)
-        fe_log_arr.append(fe_key_log)
+    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
+    e1_log_arr = []
+    for key, value in e1_d.items():
+        e1_key_std = numpy.std(e1_d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
 
 
     xRange_e2 = element2['x'].max() - element2['x'].min()
     yRange_e2 = element2['y'].max() - element2['y'].min()
 
-    section_e2 = math.ceil(xRange_e2/10)
-    ySection_e2 = math.ceil(yRange_e2/10)
+    section_e2 = math.ceil(xRange_e2/length)
+    ySection_e2 = math.ceil(yRange_e2/length)
 
     min_e2 = element2['x'].min()
     max_e2 = element2['x'].max()
@@ -165,55 +171,109 @@ def logVsLog(element1, element2):
     ymin_e2 = element2['y'].min()
     ymax_e2 = element2['y'].max()
 
-    h_d={}
-    for x in range(0,10):
-        for y in range(0,10):
-            h_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['x']) & (element2['x'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['y']) & (element2['y'] < ymin_e2+(y+1)*ySection_e2)]
+    e2_d={}
+    for x in range(0,length):
+        for y in range(0,length):
+            e2_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['x']) & (element2['x'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['y']) & (element2['y'] < ymin_e2+(y+1)*ySection_e2)]
 
-    h_log_arr = []
-    for key, value in h_d.items():
-        h_key_std = numpy.std(h_d[key][element2Value])
-        h_key_log = numpy.log(h_key_std)
-        h_log_arr.append(h_key_log)
+    e2_log_arr = []
+    for key, value in e2_d.items():
+        e2_key_std = numpy.std(e2_d[key][element2Value])
+        e2_key_log = numpy.log(e2_key_std)
+        e2_log_arr.append(e2_key_log)
+
+    # 3rd element
+    xRange_e3 = element3['x'].max() - element3['x'].min()
+    yRange_e3 = element3['y'].max() - element3['y'].min()
+
+    section_e3 = math.ceil(xRange_e3/length)
+    ySection_e3 = math.ceil(yRange_e3/length)
+
+    min_e3 = element3['x'].min()
+    max_e3 = element3['x'].max()
+
+    ymin_e3 = element3['y'].min()
+    ymax_e3 = element3['y'].max()
+
+    e3_d={}
+    for x in range(0,length):
+        for y in range(0,length):
+            e3_d["matrix{0}{1}".format(x,y)]=element3[(min_e3+x*section_e3 <= element3['x']) & (element3['x'] < min_e3+(x+1)*section_e3) & (ymin_e3+y*ySection_e3 <= element3['y']) & (element3['y'] < ymin_e3+(y+1)*ySection_e3)]
+
+    e3_log_arr = []
+    for key, value in e3_d.items():
+        e3_key_std = numpy.std(e3_d[key][element3Value])
+        e3_key_log = numpy.log(e3_key_std)
+        e3_log_arr.append(e3_key_log)
 
     plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
-    plt.xlabel(r'$('+element1Value+')\ \log(\sigma_2)$')
-    plt.ylabel(r'$('+element2Value+')\ \log(\sigma_1)$')
-    # plt(x,y) -> plt(hydrogen, iron) since first element should be on y axis and second element on x axis based on visualization paper
-    plt.scatter(h_log_arr, fe_log_arr)
+    plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
+    plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
+    # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
+    plt.scatter(e2_log_arr, e1_log_arr)
     plt.show()
 
-    fe = element1.corr()
-    h = element2.corr()
+    ##### Correlation part #####
+    el1 = element1.corr()
+    el2 = element2.corr()
+    el3 = element3.corr()
 
-    iron = fe[element1Value]
-    hydrogen = h[element2Value]
+    first_el = el1[element1Value]
+    second_el = el2[element2Value]
+    third_el = el3[element3Value]
 
-    correlation = numpy.corrcoef(fe, h)
+    # p12 correlation
+    correlation = numpy.corrcoef(el1, el2)
 
-    # This loops through the correlation matrix and puts all the points into a single array.
+    # This loops through the correlation matrix and puts all the points into a single array. (Correlation matrix is 6x6 and corr_d will have a size of 36)
     corr_d=[]
     for x in range(0, len(correlation)):
         for y in range(0, len(correlation)):
             corr_d.append(correlation[x][y])
 
+    # This will change the size of e1_log_arr to have the same size as correlation (in order to plot on graph)
     d={}
     for x in range(0,6):
         for y in range(0,6):
             d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
 
-    # Will contain the log(standard deviation) of each value in the 10x10 matrix (Using this for scatterplot)
-    fe_log_arr = []
-    for key, value in d.items():
-        fe_key_std = numpy.std(d[key][element1Value])
-        fe_key_log = numpy.log(fe_key_std)
-        fe_log_arr.append(fe_key_log)
 
+    # Will contain the log(standard deviation) of each value (Using this for correlation scatterplot)
+    e1_log_arr = []
+    for key, value in d.items():
+        e1_key_std = numpy.std(d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+    # Graph to show element1 vs p12
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
-    plt.scatter(corr_d, fe_log_arr)
+    plt.scatter(corr_d, e1_log_arr)
     plt.show()
+
+    # p23 correlation
+    correlation2 = numpy.corrcoef(el2, el3)
+
+    corr_d2=[]
+    for x in range(0, len(correlation2)):
+        for y in range(0, len(correlation2)):
+            corr_d2.append(correlation2[x][y])
+
+    #Graph to show element1 vs p23
+    plt.title(r'$log(\sigma_1)\ vs\ \rho_{23}$')
+    plt.xlabel(r'$\rho_{23}$')
+    plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
+    plt.scatter(corr_d2, e1_log_arr)
+    plt.show()
+
+    #Graph to show p12 vs p23
+    plt.title(r'$\rho_{12}\ vs\ \rho_{23}$')
+    plt.xlabel(r'$\rho_{23}$')
+    plt.ylabel(r'$\rho_{12}$')
+    plt.scatter(corr_d2, corr_d)
+    plt.show()
+
 ## END OF FUNCTIONS
 
 
@@ -234,10 +294,10 @@ for answer in answers['Layers']:
 
 
 if len(df) == 2:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot', 'Log Graph']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot']
 # chose multiple layers
 elif len(df) > 1:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Log/Correlation Graph']
 # didn't choose any
 elif len(df) == 0:
     print("You didn't choose any layers. Exiting.")
@@ -303,9 +363,9 @@ if 'Scatter Plot' in respuesta['Analysis']:
     plot(dataframe.sample(n=2000),names[answers['Layers'][0]],names[answers['Layers'][1]])
     # print(LA.eig(dataframe.as_matrix()))
 
-if 'Log Graph' in respuesta['Analysis']:
-    logVsLog(df[0], df[1])
-
+if 'Log/Correlation Graph' in respuesta['Analysis']:
+    length = int(input("How many rows/columns for matrix (single number)?"))        #for the log vs log graph
+    logAndCorrelation(df[0], df[1], df[2], length)
 
 ## clustering and covariance matrices functions need to be inserted
 ###############################################################################
