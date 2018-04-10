@@ -11,15 +11,146 @@ import seaborn as sns
 sns.set(color_codes=True)
 from sklearn import preprocessing
 from numpy import linalg as LA
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.cluster import KMeans
 
+color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
+               '#551B8C', '#B5651E', '#614051', '#669999', '#3B7A57',
+              '#007FFF', '#8A0303', '#44D7A8', '#F0E130', '#007BA7',
+              '#BFFF00', '#BFAFB2', '#FC8EAC', '#353839', '#FF77FF', '#C9FFE5',
+              '#1CA9C9', '#DA8A67' ]
 
 # dictionary holding filename and according element name
 names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
     'LP_GRS_Fe_Global_2ppd.tif': 'Iron',
-        'LP_GRS_H_Global_2ppd.tif' : 'Hydrogen'
+    'LP_GRS_H_Global_2ppd.tif' : 'Hydrogen',
+    'resizedLOLA.xyz' : 'LOLA value'
     }
 
+
 ## FUNCTIONS
+# TODO - figure how to implement this with the choices
+def plot_hours_all(df, x, y, array_of_cols, colors):
+    completeDataframe.head()
+    fig = plt.figure(figsize = (20,15))
+    ax = fig.add_subplot(111, projection='3d')
+    for counter, i in enumerate(array_of_cols):
+        p = ax.scatter(df[x], df[y], df[i], alpha = 0.25, c = colors[counter], label=i)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel('Temp')
+    plt.legend()
+    plt.title(x + ' vs ' + y)
+    plt.show()
+
+# clustering FUNCTIONS
+def kmeans_decision_algo(df, cluster, normalized):
+    print(df.head())
+    if(normalized == True):
+        kmean_algo_visualizer(normalize_df(df), cluster)
+    else:
+        kmean_algo_visualizer(df, cluster)
+
+colors = ['red', 'blue', 'green', 'purple', 'cyan']
+def kmean_algo_visualizer(df, cluster_size):
+    kmeans = KMeans(n_clusters = cluster_size)
+    kmeans.fit(df)
+    centers = kmeans.cluster_centers_
+    labels = kmeans.labels_
+    fig = plt.figure(figsize=(24,15))
+    ax = fig.gca(projection='3d')
+
+
+    for l, c in zip(range(cluster_size), colors):
+        current_members = (labels == l)
+        current_center = centers[1]
+        ax.scatter(df.iloc[current_members,0], df.iloc[current_members,1], df.iloc[current_members, 2], color=c, marker='.', alpha=0.025)
+
+    ax.scatter(centers[:,0], centers[:,1], centers[:,2], marker='X', c='black', alpha=1)
+    ax.set_xlabel(df.columns[0])
+    ax.set_ylabel(df.columns[1])
+    ax.set_zlabel(df.columns[2])
+# end of clustering FUNCTIONS
+
+def series_convertor(x):
+    if isinstance(x, pandas.Series):
+        return x.to_frame()
+
+def normalize_df(df):
+    MMS = preprocessing.MinMaxScaler()
+    normalized = MMS.fit_transform(df)
+    normalized = pandas.DataFrame(normalized)
+    normalized.columns = df.columns
+    return normalized
+
+def norm(df):
+    normal = preprocessing.Normalizer()
+    n = normal.fit_transform(df)
+    n = pandas.DataFrame(n)
+    n.columns = df.columns
+    return n
+
+def plot_x_y_normalize_all(df, x, y, normalizer, opacity):
+    if(normalizer == True):
+        df = normalize_df(df)
+    plt.scatter(df[x], df[y], c=color_array[0], alpha = opacity)
+    plt.xlabel(x)
+    plt.ylabel(y)
+    plt.title(x + ' vs ' + y)
+    plt.show()
+
+def plot_x_y_normalize_individual(df, x, normalize_x, y, normalize_y, opacity):
+    if(normalize_x == True):
+        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
+        x = 'Normalized ' + x
+    if(normalize_y == True):
+        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
+        y = 'Normalized ' + y
+    plt.scatter(df[x], df[y], c = color_array[0], alpha = opacity)
+    plt.xlabel(x)
+    plt.ylabel(y)
+    plt.title(x + ' vs ' + y)
+    plt.show()
+
+
+def plot_3_val_normalize_all(df, col_one, col_two, col_three, normalizer, opacity):
+    if(normalizer == True):
+        df = normalize_df(df)
+    plt.scatter(df[col_one], df[col_two], c=df[col_three], alpha=opacity)
+    plt.xlabel(col_one)
+    plt.ylabel(col_two)
+    plt.colorbar(label = col_three)
+    plt.title(col_one + ' vs ' + col_two)
+    plt.show()
+
+
+def plot_3_val_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, opacity):
+    if(x_norm == True):
+        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
+        x = 'Normalized ' + x
+    if(y_norm == True):
+        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
+        y = 'Normalized ' + y
+    if(z_norm == True):
+        df['Normalized ' + z] = normalize_df(series_convertor(df[z])).values
+        z = 'Normalized ' + z
+    plt.scatter(df[x], df[y], c = df[z], alpha = opacity)
+    plt.xlabel(x)
+    plt.ylabel(y)
+    plt.colorbar(label = z)
+    plt.title(x + ' vs ' + y)
+    plt.show()
+
+def plot_three_val_3d(df, x, y, z, color, alpha):
+    fig = plt.figure(figsize = (10,7))
+    ax = fig.add_subplot(111, projection='3d')
+    p = ax.scatter(df[x], df[y], df[z], alpha = alpha, marker = '.', c = color)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel(z)
+    if(type(color) != str):
+        fig.colorbar(p)
+    plt.show()
 
 def plotHistogram(df):
     fig = plt.figure(figsize=(10,7))
@@ -280,7 +411,7 @@ def logAndCorrelation(element1, element2, element3, length):
 questions = [
              inquirer.Checkbox('Layers',
                                message="What layers do you want to analyze?",
-                               choices=['LP_GRS_Th_Global_2ppd.tif', 'LP_GRS_Fe_Global_2ppd.tif', 'LP_GRS_H_Global_2ppd.tif'],
+                               choices=names.keys(),
                                ),
              ]
 answers = inquirer.prompt(questions)
@@ -294,8 +425,8 @@ for answer in answers['Layers']:
 
 
 if len(df) == 2:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot']
-# chose multiple layers
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot', 'Plot x vs y']
+# chose multiple layers442
 elif len(df) > 1:
     choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Log/Correlation Graph']
 # didn't choose any
@@ -304,7 +435,7 @@ elif len(df) == 0:
     exit(0)
 # they chose 1 layer
 else:
-    choicesList = ['Stats', 'Variance', 'Histogram']
+    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot']
 
 
 analysis = [
@@ -372,6 +503,23 @@ if 'Log/Correlation Graph' in respuesta['Analysis']:
 ###############################################################################
 ###############################################################################
 if 'Clustering' in respuesta['Analysis']:
-    print('Clustering will be done with ', answers['Layers'])
+    dataframe = aggregateValues(df)
+    # TODO - ask for normalization
+    kmeans_decision_algo(dataframe, 3, True)
+
+if 'Plot x vs y' in respuesta['Analysis']:
+    dataframe = aggregateValues(df)
+    # TODO - ask for normalization
+    plot_x_y_normalize_all(dataframe, names[answers['Layers'][0]], names[answers['Layers'][1]], False, 0.5)
+    plot_x_y_normalize_individual(dataframe, names[answers['Layers'][0]], False, names[answers['Layers'][1]], False, 0.5)
+
+if 'Plot layer' in respuesta['Analysis']:
+    # TODO - ask for normalization
+    plot_3_val_normalize_individual(df[len(df)-1], 'x', False, 'y', True, names[answers['Layers'][len(df)-1]], True, 1)
+    # plot_3_val_normalize_all(df4, 'x', 'y', 'LOLA value', False, 1)
+
+if '3d plot' in respuesta['Analysis']:
+    plot_three_val_3d(df[0], 'x', 'y', names[answers['Layers'][0]], 'blue' , 0.2)
+
 if 'Distribution of Covariance Matrices' in respuesta['Analysis']:
     print('Distribution of covariance will be done with ', answers['Layers'])
