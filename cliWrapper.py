@@ -11,15 +11,146 @@ import seaborn as sns
 sns.set(color_codes=True)
 from sklearn import preprocessing
 from numpy import linalg as LA
+from mpl_toolkits.mplot3d import Axes3D
+from sklearn.cluster import KMeans
 
+color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
+               '#551B8C', '#B5651E', '#614051', '#669999', '#3B7A57',
+              '#007FFF', '#8A0303', '#44D7A8', '#F0E130', '#007BA7',
+              '#BFFF00', '#BFAFB2', '#FC8EAC', '#353839', '#FF77FF', '#C9FFE5',
+              '#1CA9C9', '#DA8A67' ]
 
 # dictionary holding filename and according element name
 names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
     'LP_GRS_Fe_Global_2ppd.tif': 'Iron',
-        'LP_GRS_H_Global_2ppd.tif' : 'Hydrogen'
+    'LP_GRS_H_Global_2ppd.tif' : 'Hydrogen',
+    'resizedLOLA.xyz' : 'LOLA value'
     }
 
+
 ## FUNCTIONS
+# TODO - figure how to implement this with the choices
+def plot_hours_all(df, x, y, array_of_cols, colors):
+    completeDataframe.head()
+    fig = plt.figure(figsize = (20,15))
+    ax = fig.add_subplot(111, projection='3d')
+    for counter, i in enumerate(array_of_cols):
+        p = ax.scatter(df[x], df[y], df[i], alpha = 0.25, c = colors[counter], label=i)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel('Temp')
+    plt.legend()
+    plt.title(x + ' vs ' + y)
+    plt.show()
+
+# clustering FUNCTIONS
+def kmeans_decision_algo(df, cluster, normalized):
+    print(df.head())
+    if(normalized == True):
+        kmean_algo_visualizer(normalize_df(df), cluster)
+    else:
+        kmean_algo_visualizer(df, cluster)
+
+colors = ['red', 'blue', 'green', 'purple', 'cyan']
+def kmean_algo_visualizer(df, cluster_size):
+    kmeans = KMeans(n_clusters = cluster_size)
+    kmeans.fit(df)
+    centers = kmeans.cluster_centers_
+    labels = kmeans.labels_
+    fig = plt.figure(figsize=(24,15))
+    ax = fig.gca(projection='3d')
+
+
+    for l, c in zip(range(cluster_size), colors):
+        current_members = (labels == l)
+        current_center = centers[1]
+        ax.scatter(df.iloc[current_members,0], df.iloc[current_members,1], df.iloc[current_members, 2], color=c, marker='.', alpha=0.025)
+
+    ax.scatter(centers[:,0], centers[:,1], centers[:,2], marker='X', c='black', alpha=1)
+    ax.set_xlabel(df.columns[0])
+    ax.set_ylabel(df.columns[1])
+    ax.set_zlabel(df.columns[2])
+# end of clustering FUNCTIONS
+
+def series_convertor(x):
+    if isinstance(x, pandas.Series):
+        return x.to_frame()
+
+def normalize_df(df):
+    MMS = preprocessing.MinMaxScaler()
+    normalized = MMS.fit_transform(df)
+    normalized = pandas.DataFrame(normalized)
+    normalized.columns = df.columns
+    return normalized
+
+def norm(df):
+    normal = preprocessing.Normalizer()
+    n = normal.fit_transform(df)
+    n = pandas.DataFrame(n)
+    n.columns = df.columns
+    return n
+
+def plot_x_y_normalize_all(df, x, y, normalizer, opacity):
+    if(normalizer == True):
+        df = normalize_df(df)
+    plt.scatter(df[x], df[y], c=color_array[0], alpha = opacity)
+    plt.xlabel(x)
+    plt.ylabel(y)
+    plt.title(x + ' vs ' + y)
+    plt.show()
+
+def plot_x_y_normalize_individual(df, x, normalize_x, y, normalize_y, opacity):
+    if(normalize_x == True):
+        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
+        x = 'Normalized ' + x
+    if(normalize_y == True):
+        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
+        y = 'Normalized ' + y
+    plt.scatter(df[x], df[y], c = color_array[0], alpha = opacity)
+    plt.xlabel(x)
+    plt.ylabel(y)
+    plt.title(x + ' vs ' + y)
+    plt.show()
+
+
+def plot_3_val_normalize_all(df, col_one, col_two, col_three, normalizer, opacity):
+    if(normalizer == True):
+        df = normalize_df(df)
+    plt.scatter(df[col_one], df[col_two], c=df[col_three], alpha=opacity)
+    plt.xlabel(col_one)
+    plt.ylabel(col_two)
+    plt.colorbar(label = col_three)
+    plt.title(col_one + ' vs ' + col_two)
+    plt.show()
+
+
+def plot_3_val_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, opacity):
+    if(x_norm == True):
+        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
+        x = 'Normalized ' + x
+    if(y_norm == True):
+        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
+        y = 'Normalized ' + y
+    if(z_norm == True):
+        df['Normalized ' + z] = normalize_df(series_convertor(df[z])).values
+        z = 'Normalized ' + z
+    plt.scatter(df[x], df[y], c = df[z], alpha = opacity)
+    plt.xlabel(x)
+    plt.ylabel(y)
+    plt.colorbar(label = z)
+    plt.title(x + ' vs ' + y)
+    plt.show()
+
+def plot_three_val_3d(df, x, y, z, color, alpha):
+    fig = plt.figure(figsize = (10,7))
+    ax = fig.add_subplot(111, projection='3d')
+    p = ax.scatter(df[x], df[y], df[z], alpha = alpha, marker = '.', c = color)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel(z)
+    if(type(color) != str):
+        fig.colorbar(p)
+    plt.show()
 
 def plotHistogram(df):
     fig = plt.figure(figsize=(10,7))
@@ -117,9 +248,11 @@ def visualizeCovariance(listOfDataframes, norm = False):
     plt.show()
 
 
-def logVsLog(element1, element2):
+def logAndCorrelation(element1, element2, element3, length):
     element1Value = ""
     element2Value = ""
+    element3Value = ""
+
     for key in element1.keys():
         if key != 'x' and key!='y':
             element1Value = key
@@ -128,11 +261,15 @@ def logVsLog(element1, element2):
         if key != 'x' and key!='y':
             element2Value = key
 
+    for key in element3.keys():
+        if key!= 'x' and key!='y':
+            element3Value = key
+
     xRange_e1 = element1['x'].max() - element1['x'].min()
     yRange_e1 = element1['y'].max() - element1['y'].min()
 
-    section_e1 = math.ceil(xRange_e1/10)         #Manually put 10 to have 10 x 10 matrix
-    ySection_e1 = math.ceil(yRange_e1/10)
+    section_e1 = math.ceil(xRange_e1/length)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/length)
 
     min_e1 = element1['x'].min()
     max_e1 = element1['x'].max()
@@ -140,24 +277,24 @@ def logVsLog(element1, element2):
     ymin_e1 = element1['y'].min()
     ymax_e1 = element1['y'].max()
 
-    d={}
-    for x in range(0,10):
-        for y in range(0,10):
-            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
+    e1_d={}
+    for x in range(0,length):
+        for y in range(0,length):
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
 
-    # Will contain the log(standard deviation) of each value in the 10x10 matrix (Using this for scatterplot)
-    fe_log_arr = []
-    for key, value in d.items():
-        fe_key_std = numpy.std(d[key][element1Value])
-        fe_key_log = numpy.log(fe_key_std)
-        fe_log_arr.append(fe_key_log)
+    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
+    e1_log_arr = []
+    for key, value in e1_d.items():
+        e1_key_std = numpy.std(e1_d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
 
 
     xRange_e2 = element2['x'].max() - element2['x'].min()
     yRange_e2 = element2['y'].max() - element2['y'].min()
 
-    section_e2 = math.ceil(xRange_e2/10)
-    ySection_e2 = math.ceil(yRange_e2/10)
+    section_e2 = math.ceil(xRange_e2/length)
+    ySection_e2 = math.ceil(yRange_e2/length)
 
     min_e2 = element2['x'].min()
     max_e2 = element2['x'].max()
@@ -165,62 +302,116 @@ def logVsLog(element1, element2):
     ymin_e2 = element2['y'].min()
     ymax_e2 = element2['y'].max()
 
-    h_d={}
-    for x in range(0,10):
-        for y in range(0,10):
-            h_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['x']) & (element2['x'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['y']) & (element2['y'] < ymin_e2+(y+1)*ySection_e2)]
+    e2_d={}
+    for x in range(0,length):
+        for y in range(0,length):
+            e2_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['x']) & (element2['x'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['y']) & (element2['y'] < ymin_e2+(y+1)*ySection_e2)]
 
-    h_log_arr = []
-    for key, value in h_d.items():
-        h_key_std = numpy.std(h_d[key][element2Value])
-        h_key_log = numpy.log(h_key_std)
-        h_log_arr.append(h_key_log)
+    e2_log_arr = []
+    for key, value in e2_d.items():
+        e2_key_std = numpy.std(e2_d[key][element2Value])
+        e2_key_log = numpy.log(e2_key_std)
+        e2_log_arr.append(e2_key_log)
+
+    # 3rd element
+    xRange_e3 = element3['x'].max() - element3['x'].min()
+    yRange_e3 = element3['y'].max() - element3['y'].min()
+
+    section_e3 = math.ceil(xRange_e3/length)
+    ySection_e3 = math.ceil(yRange_e3/length)
+
+    min_e3 = element3['x'].min()
+    max_e3 = element3['x'].max()
+
+    ymin_e3 = element3['y'].min()
+    ymax_e3 = element3['y'].max()
+
+    e3_d={}
+    for x in range(0,length):
+        for y in range(0,length):
+            e3_d["matrix{0}{1}".format(x,y)]=element3[(min_e3+x*section_e3 <= element3['x']) & (element3['x'] < min_e3+(x+1)*section_e3) & (ymin_e3+y*ySection_e3 <= element3['y']) & (element3['y'] < ymin_e3+(y+1)*ySection_e3)]
+
+    e3_log_arr = []
+    for key, value in e3_d.items():
+        e3_key_std = numpy.std(e3_d[key][element3Value])
+        e3_key_log = numpy.log(e3_key_std)
+        e3_log_arr.append(e3_key_log)
 
     plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
-    plt.xlabel(r'$('+element1Value+')\ \log(\sigma_2)$')
-    plt.ylabel(r'$('+element2Value+')\ \log(\sigma_1)$')
-    # plt(x,y) -> plt(hydrogen, iron) since first element should be on y axis and second element on x axis based on visualization paper
-    plt.scatter(h_log_arr, fe_log_arr)
+    plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
+    plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
+    # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
+    plt.scatter(e2_log_arr, e1_log_arr)
     plt.show()
 
-    fe = element1.corr()
-    h = element2.corr()
+    ##### Correlation part #####
+    el1 = element1.corr()
+    el2 = element2.corr()
+    el3 = element3.corr()
 
-    iron = fe[element1Value]
-    hydrogen = h[element2Value]
+    first_el = el1[element1Value]
+    second_el = el2[element2Value]
+    third_el = el3[element3Value]
 
-    correlation = numpy.corrcoef(fe, h)
+    # p12 correlation
+    correlation = numpy.corrcoef(el1, el2)
 
-    # This loops through the correlation matrix and puts all the points into a single array.
+    # This loops through the correlation matrix and puts all the points into a single array. (Correlation matrix is 6x6 and corr_d will have a size of 36)
     corr_d=[]
     for x in range(0, len(correlation)):
         for y in range(0, len(correlation)):
             corr_d.append(correlation[x][y])
 
+    # This will change the size of e1_log_arr to have the same size as correlation (in order to plot on graph)
     d={}
     for x in range(0,6):
         for y in range(0,6):
             d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
 
-    # Will contain the log(standard deviation) of each value in the 10x10 matrix (Using this for scatterplot)
-    fe_log_arr = []
-    for key, value in d.items():
-        fe_key_std = numpy.std(d[key][element1Value])
-        fe_key_log = numpy.log(fe_key_std)
-        fe_log_arr.append(fe_key_log)
 
+    # Will contain the log(standard deviation) of each value (Using this for correlation scatterplot)
+    e1_log_arr = []
+    for key, value in d.items():
+        e1_key_std = numpy.std(d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+    # Graph to show element1 vs p12
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
-    plt.scatter(corr_d, fe_log_arr)
+    plt.scatter(corr_d, e1_log_arr)
     plt.show()
+
+    # p23 correlation
+    correlation2 = numpy.corrcoef(el2, el3)
+
+    corr_d2=[]
+    for x in range(0, len(correlation2)):
+        for y in range(0, len(correlation2)):
+            corr_d2.append(correlation2[x][y])
+
+    #Graph to show element1 vs p23
+    plt.title(r'$log(\sigma_1)\ vs\ \rho_{23}$')
+    plt.xlabel(r'$\rho_{23}$')
+    plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
+    plt.scatter(corr_d2, e1_log_arr)
+    plt.show()
+
+    #Graph to show p12 vs p23
+    plt.title(r'$\rho_{12}\ vs\ \rho_{23}$')
+    plt.xlabel(r'$\rho_{23}$')
+    plt.ylabel(r'$\rho_{12}$')
+    plt.scatter(corr_d2, corr_d)
+    plt.show()
+
 ## END OF FUNCTIONS
 
 
 questions = [
              inquirer.Checkbox('Layers',
                                message="What layers do you want to analyze?",
-                               choices=['LP_GRS_Th_Global_2ppd.tif', 'LP_GRS_Fe_Global_2ppd.tif', 'LP_GRS_H_Global_2ppd.tif'],
+                               choices=names.keys(),
                                ),
              ]
 answers = inquirer.prompt(questions)
@@ -234,17 +425,17 @@ for answer in answers['Layers']:
 
 
 if len(df) == 2:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot', 'Log Graph']
-# chose multiple layers
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot', 'Plot x vs y']
+# chose multiple layers442
 elif len(df) > 1:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Log/Correlation Graph']
 # didn't choose any
 elif len(df) == 0:
     print("You didn't choose any layers. Exiting.")
     exit(0)
 # they chose 1 layer
 else:
-    choicesList = ['Stats', 'Variance', 'Histogram']
+    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot']
 
 
 analysis = [
@@ -303,15 +494,32 @@ if 'Scatter Plot' in respuesta['Analysis']:
     plot(dataframe.sample(n=2000),names[answers['Layers'][0]],names[answers['Layers'][1]])
     # print(LA.eig(dataframe.as_matrix()))
 
-if 'Log Graph' in respuesta['Analysis']:
-    logVsLog(df[0], df[1])
-
+if 'Log/Correlation Graph' in respuesta['Analysis']:
+    length = int(input("How many rows/columns for matrix (single number)?"))        #for the log vs log graph
+    logAndCorrelation(df[0], df[1], df[2], length)
 
 ## clustering and covariance matrices functions need to be inserted
 ###############################################################################
 ###############################################################################
 ###############################################################################
 if 'Clustering' in respuesta['Analysis']:
-    print('Clustering will be done with ', answers['Layers'])
+    dataframe = aggregateValues(df)
+    # TODO - ask for normalization
+    kmeans_decision_algo(dataframe, 3, True)
+
+if 'Plot x vs y' in respuesta['Analysis']:
+    dataframe = aggregateValues(df)
+    # TODO - ask for normalization
+    plot_x_y_normalize_all(dataframe, names[answers['Layers'][0]], names[answers['Layers'][1]], False, 0.5)
+    plot_x_y_normalize_individual(dataframe, names[answers['Layers'][0]], False, names[answers['Layers'][1]], False, 0.5)
+
+if 'Plot layer' in respuesta['Analysis']:
+    # TODO - ask for normalization
+    plot_3_val_normalize_individual(df[len(df)-1], 'x', False, 'y', True, names[answers['Layers'][len(df)-1]], True, 1)
+    # plot_3_val_normalize_all(df4, 'x', 'y', 'LOLA value', False, 1)
+
+if '3d plot' in respuesta['Analysis']:
+    plot_three_val_3d(df[0], 'x', 'y', names[answers['Layers'][0]], 'blue' , 0.2)
+
 if 'Distribution of Covariance Matrices' in respuesta['Analysis']:
     print('Distribution of covariance will be done with ', answers['Layers'])
