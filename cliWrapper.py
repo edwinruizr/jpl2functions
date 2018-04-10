@@ -52,12 +52,14 @@ def kmeans_decision_algo(df, cluster, normalized):
         kmean_algo_visualizer(df, cluster)
 
 colors = ['red', 'blue', 'green', 'purple', 'cyan']
+
+# should be called with a df of 3 columns
 def kmean_algo_visualizer(df, cluster_size):
     kmeans = KMeans(n_clusters = cluster_size)
     kmeans.fit(df)
     centers = kmeans.cluster_centers_
     labels = kmeans.labels_
-    fig = plt.figure(figsize=(24,15))
+    fig = plt.figure(figsize=(10,7))
     ax = fig.gca(projection='3d')
 
 
@@ -70,6 +72,35 @@ def kmean_algo_visualizer(df, cluster_size):
     ax.set_xlabel(df.columns[0])
     ax.set_ylabel(df.columns[1])
     ax.set_zlabel(df.columns[2])
+    plt.show()
+
+
+
+def col_number_getter(df, target):
+    for i in range(len(df.columns)):
+        if(df.columns[i] == target):
+            return i
+
+def cluster_visualizer(df, col_one, col_two, col_three, cluster_size):
+    kmeans = KMeans(n_clusters = cluster_size)
+    kmeans.fit(df)
+    centers = kmeans.cluster_centers_
+    labels = kmeans.labels_
+    fig = plt.figure(figsize=(10,7))
+    ax = fig.gca(projection='3d')
+    col_one_number = col_number_getter(df, col_one)
+    col_two_number = col_number_getter(df, col_two)
+    col_three_number = col_number_getter(df, col_three)
+
+    for l, c in zip(range(cluster_size), colors):
+        current_members = (labels == l)
+        current_center = centers[1]
+        ax.scatter(df.iloc[current_members][col_one], df.iloc[current_members][col_two], df.iloc[current_members][col_three], color=c, marker='.', alpha=0.025)
+    ax.scatter(centers[:,col_one_number], centers[:,col_two_number], centers[:,col_three_number], marker='X', c='black', alpha=1)
+    ax.set_xlabel(col_one)
+    ax.set_ylabel(col_two)
+    ax.set_zlabel(col_three)
+    plt.show()
 # end of clustering FUNCTIONS
 
 def series_convertor(x):
@@ -503,9 +534,17 @@ if 'Log/Correlation Graph' in respuesta['Analysis']:
 ###############################################################################
 ###############################################################################
 if 'Clustering' in respuesta['Analysis']:
-    dataframe = aggregateValues(df)
-    # TODO - ask for normalization
-    kmeans_decision_algo(dataframe, 3, True)
+    wholeDf = pandas.merge(df[0], df[1], on=['x', 'y'])
+
+    print(wholeDf.head())
+
+    # dataframe = aggregateValues(df)
+    # # TODO - ask for normalization
+    # kmeans_decision_algo(dataframe, 3, True)
+
+    # TODO - ask user what 3 parts of an element they want to visualize
+    cluster_visualizer(wholeDf, 'x', 'y', 'Iron', 3)
+
 
 if 'Plot x vs y' in respuesta['Analysis']:
     dataframe = aggregateValues(df)
