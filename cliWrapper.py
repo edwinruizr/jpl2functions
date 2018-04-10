@@ -45,7 +45,6 @@ def plot_hours_all(df, x, y, array_of_cols, colors):
 
 # clustering FUNCTIONS
 def kmeans_decision_algo(df, cluster, normalized):
-    print(df.head())
     if(normalized == True):
         kmean_algo_visualizer(normalize_df(df), cluster)
     else:
@@ -535,27 +534,61 @@ if 'Log/Correlation Graph' in respuesta['Analysis']:
 ###############################################################################
 if 'Clustering' in respuesta['Analysis']:
     wholeDf = pandas.merge(df[0], df[1], on=['x', 'y'])
+    dataframe = aggregateValues(df)
+    while True:
+        visualizeInput = input("Do you want to normalize the data? (y/n)")
+        if visualizeInput == 'y':
+            kmeans_decision_algo(dataframe, 3, True)
+            break
+        elif visualizeInput == 'n':
+            kmeans_decision_algo(dataframe, 3, False)
+            break
 
-    print(wholeDf.head())
-
-    # dataframe = aggregateValues(df)
-    # # TODO - ask for normalization
-    # kmeans_decision_algo(dataframe, 3, True)
 
     # TODO - ask user what 3 parts of an element they want to visualize
-    cluster_visualizer(wholeDf, 'x', 'y', 'Iron', 3)
+    cAnswerLength = 0
+    while cAnswerLength!=3:
+        cluster = [
+                     inquirer.Checkbox('Cluster',
+                                       message="What 3 elements do you want to visualize?",
+                                       choices= list(wholeDf.columns.values),
+                                       validate= True if len(answer)==3 else 'You must choose 3 elements.'
+                                       ),
+                     ]
+        cAnswer = inquirer.prompt(cluster)
+        print(len(cAnswer))
+        #TODO - doesn't break out of loop
+        cAnswerLength = len(cAnswer)
+        print(cAnswerLength!=3)
+
+    cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
 
 
 if 'Plot x vs y' in respuesta['Analysis']:
     dataframe = aggregateValues(df)
-    # TODO - ask for normalization
-    plot_x_y_normalize_all(dataframe, names[answers['Layers'][0]], names[answers['Layers'][1]], False, 0.5)
-    plot_x_y_normalize_individual(dataframe, names[answers['Layers'][0]], False, names[answers['Layers'][1]], False, 0.5)
+    while True:
+        visualizeInput = input("Do you want to normalize the data? (y/n)")
+        if visualizeInput == 'y':
+            plot_x_y_normalize_all(dataframe, names[answers['Layers'][0]], names[answers['Layers'][1]], True, 0.5)
+            break
+        elif visualizeInput == 'n':
+            plot_x_y_normalize_all(dataframe, names[answers['Layers'][0]], names[answers['Layers'][1]], False, 0.5)
+            break
+
+    # plot_x_y_normalize_individual(dataframe, names[answers['Layers'][0]], False, names[answers['Layers'][1]], False, 0.5)
+
 
 if 'Plot layer' in respuesta['Analysis']:
-    # TODO - ask for normalization
-    plot_3_val_normalize_individual(df[len(df)-1], 'x', False, 'y', True, names[answers['Layers'][len(df)-1]], True, 1)
-    # plot_3_val_normalize_all(df4, 'x', 'y', 'LOLA value', False, 1)
+    while True:
+        visualizeInput = input("Do you want to normalize the data? (y/n)")
+        if visualizeInput == 'y':
+            plot_3_val_normalize_all(df[len(df)-1], 'x', 'y', names[answers['Layers'][len(df)-1]], True, 1)
+            break
+        elif visualizeInput == 'n':
+            plot_3_val_normalize_all(df[len(df)-1], 'x', 'y', names[answers['Layers'][len(df)-1]], False, 1)
+            break
+    # plot_3_val_normalize_individual(df[len(df)-1], 'x', False, 'y', True, names[answers['Layers'][len(df)-1]], True, 1)
+
 
 if '3d plot' in respuesta['Analysis']:
     plot_three_val_3d(df[0], 'x', 'y', names[answers['Layers'][0]], 'blue' , 0.2)
