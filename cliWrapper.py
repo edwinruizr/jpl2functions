@@ -46,8 +46,6 @@ def plot_hours_all(df, x, y, array_of_cols, colors):
     plt.show()
 
 def make3dPlot(dataframe):
-    plotly.offline.init_notebook_mode()
-    # Read data from a csv
     z_data = dataframe
     colnames = (dataframe.columns.values)
     data = [
@@ -68,8 +66,7 @@ def make3dPlot(dataframe):
        )
     )
     fig = go.Figure(data=data, layout=layout)
-    plotly.offline.iplot(fig, filename='3d-surface')
-    return
+    plot(fig)
 
 # clustering FUNCTIONS
 def kmeans_decision_algo(df, cluster, normalized):
@@ -542,19 +539,23 @@ if 'Variance' in respuesta['Analysis']:
 
 
 if 'Histogram' in respuesta['Analysis']:
-    # df = fileToDataframe(answers['Layers'][0])
-    # print(df[0].head())
-    # TODO - ask for number of bins from user
-    bins = int(input("How many bins for histogram?"))
+    try:
+        bins = int(input("How many bins for histogram (minimum 10)?"))
+    except ValueError:
+        print("Enter a number")
+        bins = 0
     while(bins < 10):
-        bins = int(input("How many bins for histogram?"))
+        try:
+            bins = int(input("How many bins for histogram?"))
+        except ValueError:
+            print("Enter a number")
+            bins = 0
     plotHistogram(df[0], bins)
 
 
 if 'Scatter Plot' in respuesta['Analysis']:
     # TODO - ask user for sample (integer)
     plot(dataframe.sample(n=2000),names[answers['Layers'][0]],names[answers['Layers'][1]])
-    # print(LA.eig(dataframe.as_matrix()))
 
 
 if 'Log/Correlation Graph' in respuesta['Analysis']:
@@ -575,8 +576,8 @@ if 'Clustering' in respuesta['Analysis']:
             kmeans_decision_algo(dataframe, 3, False)
             break
 
+    wholeDf = pandas.merge(df[0], df[1], on=['x', 'y'])
 
-    # TODO - ask user what 3 parts of an element they want to visualize
     cAnswerLength = 0
     while cAnswerLength!=3:
         cluster = [
@@ -588,7 +589,7 @@ if 'Clustering' in respuesta['Analysis']:
         cAnswer = inquirer.prompt(cluster)
         cAnswerLength = len(cAnswer['Cluster'])
 
-    wholeDf = pandas.merge(df[0], df[1], on=['x', 'y'])
+
     # run function with choices choosen
     cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
 
@@ -620,4 +621,160 @@ if 'Plot layer' in respuesta['Analysis']:
 
 if '3d plot' in respuesta['Analysis']:
     # plot_three_val_3d(df[0], 'x', 'y', names[answers['Layers'][0]], 'blue' , 0.2)
+    print(df[0].head())
     make3dPlot(df[0])
+
+
+while True:
+    visualizeTemp = input("Do you want to visualize the temp for the 24 hours?")
+    if visualizeTemp == 'y':
+        print("grab a cup of coffee (this is going to take a while!)")
+        # hour 0
+        hour00 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour00.xyz", header= None, delim_whitespace= True, encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp00']
+        hour00.columns = names
+
+        # hour 1
+        hour01 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour01.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp01']
+        hour01.columns = names
+        completeDataframe = hour00.merge(hour01,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 2
+        hour02 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour02.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp02']
+        hour02.columns = names
+        completeDataframe = completeDataframe.merge(hour02,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 3
+        hour03 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour03.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp03']
+        hour03.columns = names
+
+        completeDataframe = completeDataframe.merge(hour03,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 4
+        hour04 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour04.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp04']
+        hour04.columns = names
+        completeDataframe = completeDataframe.merge(hour04,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 5
+        hour05 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour05.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp05']
+        hour05.columns = names
+        completeDataframe = completeDataframe.merge(hour05,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 6
+        hour06 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour06.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp06']
+        hour06.columns = names
+        completeDataframe = completeDataframe.merge(hour06,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 7
+        hour07 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour07.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp07']
+        hour07.columns = names
+        completeDataframe = completeDataframe.merge(hour07,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 8
+        hour08 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour08.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp08']
+        hour08.columns = names
+        completeDataframe = completeDataframe.merge(hour08,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 9
+        hour09 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour09.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp09']
+        hour09.columns = names
+        completeDataframe = completeDataframe.merge(hour09,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 10
+        hour10 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour10.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp10']
+        hour10.columns = names
+        completeDataframe = completeDataframe.merge(hour10,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 11
+        hour11 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour11.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp11']
+        hour11.columns = names
+        completeDataframe = completeDataframe.merge(hour11,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 12
+        hour12 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour12.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp12']
+        hour12.columns = names
+        completeDataframe = completeDataframe.merge(hour12,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 13
+        hour13 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour13.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp13']
+        hour13.columns = names
+        completeDataframe = completeDataframe.merge(hour13,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 14
+        hour14 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour14.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp14']
+        hour14.columns = names
+        completeDataframe = completeDataframe.merge(hour14,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 15
+        hour15 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour15.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp15']
+        hour15.columns = names
+        completeDataframe = completeDataframe.merge(hour15,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 16
+        hour16 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour16.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp16']
+        hour16.columns = names
+        completeDataframe = completeDataframe.merge(hour16,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 17
+        hour17 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour17.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp17']
+        hour17.columns = names
+        completeDataframe = completeDataframe.merge(hour17,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 18
+        hour18 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour18.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp18']
+        hour18.columns = names
+        completeDataframe = completeDataframe.merge(hour18,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 19
+        hour19 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour19.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp19']
+        hour19.columns = names
+        completeDataframe = completeDataframe.merge(hour19,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 20
+        hour20 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour20.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp20']
+        hour20.columns = names
+        completeDataframe = completeDataframe.merge(hour20,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 21
+        hour21 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour21.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp21']
+        hour21.columns = names
+        completeDataframe = completeDataframe.merge(hour21,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 22
+        hour22 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour22.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp22']
+        hour22.columns = names
+        completeDataframe = completeDataframe.merge(hour22,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        # hour 23
+        hour23 = pandas.DataFrame(pandas.read_csv("./temperature_xyz/temp_avg_hour23.xyz",header= None, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        names = ['Longitude', 'Latitude', 'Temp23']
+        hour23.columns = names
+        completeDataframe = completeDataframe.merge(hour23,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
+
+        plot_hours_all(completeDataframe, 'Longitude', 'Latitude', completeDataframe.columns[2:26], color_array)
+        break
+    elif visualizeTemp == 'n':
+        print("bless your soul!")
+        break
