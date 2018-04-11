@@ -392,12 +392,14 @@ def logAndCorrelation(element1, element2, element3, length):
         e3_key_log = numpy.log(e3_key_std)
         e3_log_arr.append(e3_key_log)
 
+
+    # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
+    plt.subplot(2,2,1)
     plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
     plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
     plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
-    # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
     plt.scatter(e2_log_arr, e1_log_arr)
-    plt.show()
+    # plt.show()
 
     ##### Correlation part #####
     el1 = element1.corr()
@@ -432,11 +434,14 @@ def logAndCorrelation(element1, element2, element3, length):
         e1_log_arr.append(e1_key_log)
 
     # Graph to show element1 vs p12
+
+    plt.subplot(2,2,2)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
     plt.scatter(corr_d, e1_log_arr)
-    plt.show()
+
+    # plt.show()
 
     # p23 correlation
     correlation2 = numpy.corrcoef(el2, el3)
@@ -447,17 +452,22 @@ def logAndCorrelation(element1, element2, element3, length):
             corr_d2.append(correlation2[x][y])
 
     #Graph to show element1 vs p23
+
+    plt.subplot(2,2,3)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
     plt.scatter(corr_d2, e1_log_arr)
-    plt.show()
+    # plt.show()
 
     #Graph to show p12 vs p23
+
+    plt.subplot(2,2,4)
     plt.title(r'$\rho_{12}\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'$\rho_{12}$')
     plt.scatter(corr_d2, corr_d)
+    plt.tight_layout()
     plt.show()
 
 ## END OF FUNCTIONS
