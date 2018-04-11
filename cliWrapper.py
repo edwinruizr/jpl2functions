@@ -13,6 +13,8 @@ from sklearn import preprocessing
 from numpy import linalg as LA
 from mpl_toolkits.mplot3d import Axes3D
 from sklearn.cluster import KMeans
+import plotly
+import plotly.graph_objs as go
 
 color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
                '#551B8C', '#B5651E', '#614051', '#669999', '#3B7A57',
@@ -42,6 +44,32 @@ def plot_hours_all(df, x, y, array_of_cols, colors):
     plt.legend()
     plt.title(x + ' vs ' + y)
     plt.show()
+
+def make3dPlot(dataframe):
+    plotly.offline.init_notebook_mode()
+    # Read data from a csv
+    z_data = dataframe
+    colnames = (dataframe.columns.values)
+    data = [
+       go.Surface(
+           z=z_data.as_matrix()
+       )
+    ]
+    layout = go.Layout(
+       title=colnames[2],
+       autosize=False,
+       width=500,
+       height=500,
+       margin=dict(
+           l=65,
+           r=50,
+           b=65,
+           t=90
+       )
+    )
+    fig = go.Figure(data=data, layout=layout)
+    plotly.offline.iplot(fig, filename='3d-surface')
+    return
 
 # clustering FUNCTIONS
 def kmeans_decision_algo(df, cluster, normalized):
@@ -182,14 +210,14 @@ def plot_three_val_3d(df, x, y, z, color, alpha):
         fig.colorbar(p)
     plt.show()
 
-def plotHistogram(df):
+def plotHistogram(df, binNumbers):
     fig = plt.figure(figsize=(10,7))
     plt.xlabel('Value', fontsize= 20)
     plt.ylabel('Frequency', fontsize= 20)
     plt.title(df.columns.values.tolist()[-1], fontsize= 30)
     ax = fig.add_subplot(111)
     df = df.iloc[:,2].copy()
-    ax = df.hist(figsize=(10,7), bins= 25)
+    ax = df.hist(figsize=(10,7), bins= binNumbers)
     plt.show()
 
 def plot(df, xname, yname):
@@ -455,10 +483,10 @@ for answer in answers['Layers']:
 
 
 if len(df) == 2:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Scatter Plot', 'Plot x vs y']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Scatter Plot', 'Plot x vs y']
 # chose multiple layers442
 elif len(df) > 1:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Distribution of Covariance Matrices', 'Log/Correlation Graph']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Log/Correlation Graph']
 # didn't choose any
 elif len(df) == 0:
     print("You didn't choose any layers. Exiting.")
@@ -477,64 +505,67 @@ analysis = [
 respuesta = inquirer.prompt(analysis)
 
 
+dataframe = aggregateValues(df)
+
+
 if 'Stats' in respuesta['Analysis']:
     print(getStats(df))
 
+
 if 'Covariance' in respuesta['Analysis']:
-    resultsDF = aggregateValues(df)
+    aggregatedDataframe = aggregateValues(df)
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
             visualizeCovariance(df, norm = True)
-            #    print(numpy.linalg.eigvals(resultsDF.replace('n/a', 0).astype(float)))
-            resultsDF = pandas.DataFrame(preprocessing.MinMaxScaler().fit_transform(resultsDF), columns=resultsDF.columns, index=resultsDF.index)
-#            print(norm.cov())
-#            print(norm.describe())
             break
         elif visualizeInput == 'n':
-            visualizeCovariance(df, norm = True)
+            visualizeCovariance(df, norm = False)
             break
-
 
 
 if 'Correlation' in respuesta['Analysis']:
     visualizeCorrelation(df)
 
 
-
 if 'Variance' in respuesta['Analysis']:
-    dataframe = aggregateValues(df)
     variance = dataframe.var()
-    print(variance)
+    # print(variance)
     mu = dataframe.mean().mean()
-    print(mu)
+    # print(mu)
     sigma = math.sqrt(variance)
-    print(sigma)
+    # print(sigma)
     x = numpy.linspace(mu - 3*sigma, mu + 3*sigma, 100)
     plt.title("Normal Distribution "+names[answers['Layers'][0]], fontsize= 30)
     plt.plot(x,mlab.normpdf(x, mu, sigma))
     plt.show()
 
+
 if 'Histogram' in respuesta['Analysis']:
-    df = fileToDataframe(answers['Layers'][0])
-    plotHistogram(df)
+    # df = fileToDataframe(answers['Layers'][0])
+    # print(df[0].head())
+    # TODO - ask for number of bins from user
+    bins = int(input("How many bins for histogram?"))
+    while(bins < 10):
+        bins = int(input("How many bins for histogram?"))
+    plotHistogram(df[0], bins)
+
 
 if 'Scatter Plot' in respuesta['Analysis']:
-    dataframe = aggregateValues(df)
+    # TODO - ask user for sample (integer)
     plot(dataframe.sample(n=2000),names[answers['Layers'][0]],names[answers['Layers'][1]])
     # print(LA.eig(dataframe.as_matrix()))
+
 
 if 'Log/Correlation Graph' in respuesta['Analysis']:
     length = int(input("How many rows/columns for matrix (single number)?"))        #for the log vs log graph
     logAndCorrelation(df[0], df[1], df[2], length)
 
-## clustering and covariance matrices functions need to be inserted
-###############################################################################
-###############################################################################
-###############################################################################
+
+# clustering
+# TODO - crashes if 2 files are choosen
 if 'Clustering' in respuesta['Analysis']:
-    wholeDf = pandas.merge(df[0], df[1], on=['x', 'y'])
-    dataframe = aggregateValues(df)
+    # normalize?
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
@@ -552,20 +583,17 @@ if 'Clustering' in respuesta['Analysis']:
                      inquirer.Checkbox('Cluster',
                                        message="What 3 elements do you want to visualize?",
                                        choices= list(wholeDf.columns.values),
-                                       validate= True if len(answer)==3 else 'You must choose 3 elements.'
                                        ),
                      ]
         cAnswer = inquirer.prompt(cluster)
-        print(len(cAnswer))
-        #TODO - doesn't break out of loop
-        cAnswerLength = len(cAnswer)
-        print(cAnswerLength!=3)
+        cAnswerLength = len(cAnswer['Cluster'])
 
+    wholeDf = pandas.merge(df[0], df[1], on=['x', 'y'])
+    # run function with choices choosen
     cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
 
-
+# TODO - is the same as the scatterplot section
 if 'Plot x vs y' in respuesta['Analysis']:
-    dataframe = aggregateValues(df)
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
@@ -591,7 +619,5 @@ if 'Plot layer' in respuesta['Analysis']:
 
 
 if '3d plot' in respuesta['Analysis']:
-    plot_three_val_3d(df[0], 'x', 'y', names[answers['Layers'][0]], 'blue' , 0.2)
-
-if 'Distribution of Covariance Matrices' in respuesta['Analysis']:
-    print('Distribution of covariance will be done with ', answers['Layers'])
+    # plot_three_val_3d(df[0], 'x', 'y', names[answers['Layers'][0]], 'blue' , 0.2)
+    make3dPlot(df[0])
