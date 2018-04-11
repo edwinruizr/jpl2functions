@@ -569,9 +569,19 @@ if 'Scatter Plot' in respuesta['Analysis']:
 
 
 if 'Log/Correlation Graph' in respuesta['Analysis']:
-    length = int(input("How many rows/columns for matrix (single number)?"))        #for the log vs log graph
+    # To show up the first time
+    length = int(input("How many rows/columns for matrix (single number)?"))
     logAndCorrelation(df[0], df[1], df[2], length)
 
+    # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
+    # Also to allow user to exit if they want to stop looking at graphs
+    while True:
+        userChoice = input("\nWould you like to continue to view graphs? (y/n)")
+        if userChoice == 'y':
+            length = int(input("How many rows/columns for matrix (single number)?"))
+            logAndCorrelation(df[0], df[1], df[2], length)
+        elif userChoice == 'n':
+            exit(0)
 
 # clustering
 # TODO - crashes if 2 files are choosen
