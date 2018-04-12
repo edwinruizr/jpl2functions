@@ -65,6 +65,8 @@ def kmean_algo_visualizer(df, cluster_size):
         current_members = (labels == l)
         current_center = centers[1]
         ax.scatter(df.iloc[current_members,0], df.iloc[current_members,1], df.iloc[current_members, 2], color=c, marker='.', alpha=0.025)
+        print(current_members)
+
 
     ax.scatter(centers[:,0], centers[:,1], centers[:,2], marker='X', c='black', alpha=1)
     ax.set_xlabel(df.columns[0])
@@ -506,6 +508,7 @@ if 'Clustering' in respuesta['Analysis']:
     dataframe = aggregateValues(df)
     # TODO - ask for normalization
     kmeans_decision_algo(dataframe, 3, True)
+#    kmean_algo_visualizer(dataframe, 3)
 
 if 'Plot x vs y' in respuesta['Analysis']:
     dataframe = aggregateValues(df)
