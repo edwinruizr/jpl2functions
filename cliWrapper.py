@@ -303,7 +303,7 @@ def visualizeCovariance(listOfDataframes, norm = False):
     plt.show()
 
 
-def logAndCorrelation(element1, element2, element3, length):
+def logAndCorrelation(element1, element2, element3, row, column):
     element1Value = ""
     element2Value = ""
     element3Value = ""
@@ -323,8 +323,8 @@ def logAndCorrelation(element1, element2, element3, length):
     xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
     yRange_e1 = element1['Long'].max() - element1['Long'].min()
 
-    section_e1 = math.ceil(xRange_e1/length)         # length specified by user
-    ySection_e1 = math.ceil(yRange_e1/length)
+    section_e1 = math.ceil(xRange_e1/row)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/column)
 
     min_e1 = element1['Lat'].min()
     max_e1 = element1['Lat'].max()
@@ -333,8 +333,8 @@ def logAndCorrelation(element1, element2, element3, length):
     ymax_e1 = element1['Long'].max()
 
     e1_d={}
-    for x in range(0,length):
-        for y in range(0,length):
+    for x in range(0,row):
+        for y in range(0,column):
             e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
 
     # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
@@ -348,8 +348,8 @@ def logAndCorrelation(element1, element2, element3, length):
     xRange_e2 = element2['Lat'].max() - element2['Lat'].min()
     yRange_e2 = element2['Long'].max() - element2['Long'].min()
 
-    section_e2 = math.ceil(xRange_e2/length)
-    ySection_e2 = math.ceil(yRange_e2/length)
+    section_e2 = math.ceil(xRange_e2/row)
+    ySection_e2 = math.ceil(yRange_e2/column)
 
     min_e2 = element2['Lat'].min()
     max_e2 = element2['Lat'].max()
@@ -358,8 +358,8 @@ def logAndCorrelation(element1, element2, element3, length):
     ymax_e2 = element2['Long'].max()
 
     e2_d={}
-    for x in range(0,length):
-        for y in range(0,length):
+    for x in range(0,row):
+        for y in range(0,column):
             e2_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['Lat']) & (element2['Lat'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['Long']) & (element2['Long'] < ymin_e2+(y+1)*ySection_e2)]
 
     e2_log_arr = []
@@ -372,8 +372,8 @@ def logAndCorrelation(element1, element2, element3, length):
     xRange_e3 = element3['Lat'].max() - element3['Lat'].min()
     yRange_e3 = element3['Long'].max() - element3['Long'].min()
 
-    section_e3 = math.ceil(xRange_e3/length)
-    ySection_e3 = math.ceil(yRange_e3/length)
+    section_e3 = math.ceil(xRange_e3/row)
+    ySection_e3 = math.ceil(yRange_e3/column)
 
     min_e3 = element3['Lat'].min()
     max_e3 = element3['Lat'].max()
@@ -382,8 +382,8 @@ def logAndCorrelation(element1, element2, element3, length):
     ymax_e3 = element3['Long'].max()
 
     e3_d={}
-    for x in range(0,length):
-        for y in range(0,length):
+    for x in range(0,row):
+        for y in range(0,column):
             e3_d["matrix{0}{1}".format(x,y)]=element3[(min_e3+x*section_e3 <= element3['Lat']) & (element3['Lat'] < min_e3+(x+1)*section_e3) & (ymin_e3+y*ySection_e3 <= element3['Long']) & (element3['Long'] < ymin_e3+(y+1)*ySection_e3)]
 
     e3_log_arr = []
@@ -572,16 +572,18 @@ if 'Scatter Plot' in respuesta['Analysis']:
 
 if 'Log/Correlation Graph' in respuesta['Analysis']:
     # To show up the first time
-    length = int(input("How many rows/columns for matrix (single number)?"))
-    logAndCorrelation(df[0], df[1], df[2], length)
+    row = int(input("How many rows for matrix? "))
+    column = int(input("How many columns for matrix? "))
+    logAndCorrelation(df[0], df[1], df[2], row, column)
 
     # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
     # Also to allow user to exit if they want to stop looking at graphs
     while True:
         userChoice = input("\nWould you like to continue to view graphs? (y/n)")
         if userChoice == 'y':
-            length = int(input("How many rows/columns for matrix (single number)?"))
-            logAndCorrelation(df[0], df[1], df[2], length)
+            row = int(input("How many rows for matrix? "))
+            column = int(input("How many columns for matrix? "))
+            logAndCorrelation(df[0], df[1], df[2], row, column)
         elif userChoice == 'n':
             exit(0)
 
