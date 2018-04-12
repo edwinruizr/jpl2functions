@@ -309,33 +309,33 @@ def logAndCorrelation(element1, element2, element3, length):
     element3Value = ""
 
     for key in element1.keys():
-        if key != 'x' and key!='y':
+        if key != 'Lat' and key!='Long':
             element1Value = key
 
     for key in element2.keys():
-        if key != 'x' and key!='y':
+        if key != 'Lat' and key!='Long':
             element2Value = key
 
     for key in element3.keys():
-        if key!= 'x' and key!='y':
+        if key!= 'Lat' and key!='Long':
             element3Value = key
 
-    xRange_e1 = element1['x'].max() - element1['x'].min()
-    yRange_e1 = element1['y'].max() - element1['y'].min()
+    xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
+    yRange_e1 = element1['Long'].max() - element1['Long'].min()
 
     section_e1 = math.ceil(xRange_e1/length)         # length specified by user
     ySection_e1 = math.ceil(yRange_e1/length)
 
-    min_e1 = element1['x'].min()
-    max_e1 = element1['x'].max()
+    min_e1 = element1['Lat'].min()
+    max_e1 = element1['Lat'].max()
 
-    ymin_e1 = element1['y'].min()
-    ymax_e1 = element1['y'].max()
+    ymin_e1 = element1['Long'].min()
+    ymax_e1 = element1['Long'].max()
 
     e1_d={}
     for x in range(0,length):
         for y in range(0,length):
-            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
 
     # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
     e1_log_arr = []
@@ -345,22 +345,22 @@ def logAndCorrelation(element1, element2, element3, length):
         e1_log_arr.append(e1_key_log)
 
 
-    xRange_e2 = element2['x'].max() - element2['x'].min()
-    yRange_e2 = element2['y'].max() - element2['y'].min()
+    xRange_e2 = element2['Lat'].max() - element2['Lat'].min()
+    yRange_e2 = element2['Long'].max() - element2['Long'].min()
 
     section_e2 = math.ceil(xRange_e2/length)
     ySection_e2 = math.ceil(yRange_e2/length)
 
-    min_e2 = element2['x'].min()
-    max_e2 = element2['x'].max()
+    min_e2 = element2['Lat'].min()
+    max_e2 = element2['Lat'].max()
 
-    ymin_e2 = element2['y'].min()
-    ymax_e2 = element2['y'].max()
+    ymin_e2 = element2['Long'].min()
+    ymax_e2 = element2['Long'].max()
 
     e2_d={}
     for x in range(0,length):
         for y in range(0,length):
-            e2_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['x']) & (element2['x'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['y']) & (element2['y'] < ymin_e2+(y+1)*ySection_e2)]
+            e2_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['Lat']) & (element2['Lat'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['Long']) & (element2['Long'] < ymin_e2+(y+1)*ySection_e2)]
 
     e2_log_arr = []
     for key, value in e2_d.items():
@@ -369,22 +369,22 @@ def logAndCorrelation(element1, element2, element3, length):
         e2_log_arr.append(e2_key_log)
 
     # 3rd element
-    xRange_e3 = element3['x'].max() - element3['x'].min()
-    yRange_e3 = element3['y'].max() - element3['y'].min()
+    xRange_e3 = element3['Lat'].max() - element3['Lat'].min()
+    yRange_e3 = element3['Long'].max() - element3['Long'].min()
 
     section_e3 = math.ceil(xRange_e3/length)
     ySection_e3 = math.ceil(yRange_e3/length)
 
-    min_e3 = element3['x'].min()
-    max_e3 = element3['x'].max()
+    min_e3 = element3['Lat'].min()
+    max_e3 = element3['Lat'].max()
 
-    ymin_e3 = element3['y'].min()
-    ymax_e3 = element3['y'].max()
+    ymin_e3 = element3['Long'].min()
+    ymax_e3 = element3['Long'].max()
 
     e3_d={}
     for x in range(0,length):
         for y in range(0,length):
-            e3_d["matrix{0}{1}".format(x,y)]=element3[(min_e3+x*section_e3 <= element3['x']) & (element3['x'] < min_e3+(x+1)*section_e3) & (ymin_e3+y*ySection_e3 <= element3['y']) & (element3['y'] < ymin_e3+(y+1)*ySection_e3)]
+            e3_d["matrix{0}{1}".format(x,y)]=element3[(min_e3+x*section_e3 <= element3['Lat']) & (element3['Lat'] < min_e3+(x+1)*section_e3) & (ymin_e3+y*ySection_e3 <= element3['Long']) & (element3['Long'] < ymin_e3+(y+1)*ySection_e3)]
 
     e3_log_arr = []
     for key, value in e3_d.items():
@@ -423,7 +423,7 @@ def logAndCorrelation(element1, element2, element3, length):
     d={}
     for x in range(0,6):
         for y in range(0,6):
-            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['x']) & (element1['x'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['y']) & (element1['y'] < ymin_e1+(y+1)*ySection_e1)]
+            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
 
 
     # Will contain the log(standard deviation) of each value (Using this for correlation scatterplot)
@@ -485,7 +485,11 @@ df = []
 # answers holds the layers to be analyzed
 for answer in answers['Layers']:
     if answer in names:
-        df.append(fileToDataframe(answer))
+        tempDf = fileToDataframe(answer)
+        # TODO - call conversion function HERE
+        tempDf = tempDf.rename(columns={"x": "Lat", "y": "Long"})
+        print(tempDf.head())
+        df.append(tempDf)
 #df now is a list of dataframes for the files selected
 
 
@@ -619,7 +623,7 @@ if 'Clustering' in respuesta['Analysis']:
             kmeans_decision_algo(dataframe, clusterSize, False)
             break
 
-    wholeDf = pandas.merge(df[0], df[1], on=['x', 'y'])
+    wholeDf = pandas.merge(df[0], df[1], on=['Lat', 'Long'])
 
     cAnswerLength = 0
     while cAnswerLength!=3:
@@ -654,10 +658,10 @@ if 'Plot layer' in respuesta['Analysis']:
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
-            plot_3_val_normalize_all(df[len(df)-1], 'x', 'y', names[answers['Layers'][len(df)-1]], True, 1)
+            plot_3_val_normalize_all(df[len(df)-1], 'Lat', 'Long', names[answers['Layers'][len(df)-1]], True, 1)
             break
         elif visualizeInput == 'n':
-            plot_3_val_normalize_all(df[len(df)-1], 'x', 'y', names[answers['Layers'][len(df)-1]], False, 1)
+            plot_3_val_normalize_all(df[len(df)-1], 'Lat', 'Long', names[answers['Layers'][len(df)-1]], False, 1)
             break
     # plot_3_val_normalize_individual(df[len(df)-1], 'x', False, 'y', True, names[answers['Layers'][len(df)-1]], True, 1)
 
