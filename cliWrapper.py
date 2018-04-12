@@ -532,16 +532,14 @@ if 'Covariance' in respuesta['Analysis']:
 
 
 if 'Correlation' in respuesta['Analysis']:
+    # normalization doesn't matter (produces the same output)
     visualizeCorrelation(df)
 
 
 if 'Variance' in respuesta['Analysis']:
     variance = dataframe.var()
-    # print(variance)
     mu = dataframe.mean().mean()
-    # print(mu)
     sigma = math.sqrt(variance)
-    # print(sigma)
     x = numpy.linspace(mu - 3*sigma, mu + 3*sigma, 100)
     plt.title("Normal Distribution "+names[answers['Layers'][0]], fontsize= 30)
     plt.plot(x,mlab.normpdf(x, mu, sigma))
@@ -586,14 +584,39 @@ if 'Log/Correlation Graph' in respuesta['Analysis']:
 # clustering
 # TODO - crashes if 2 files are choosen
 if 'Clustering' in respuesta['Analysis']:
+    # ask for number of clusters
+    while True:
+        try:
+            clusterSize = int(input("How many clusters? (2-10)"))
+        except ValueError:
+            print("Enter a number!")
+            clusterSize = 0
+        if 2 <= clusterSize <= 10:
+            break
+
     # normalize?
+    normalizeBoolList = []
+    for i in range(len(answers['Layers'])):
+
+        while True:
+            visualizeInput = input("Do you want to normalize "+ names[answers['Layers'][i]] +" data? (y/n)")
+            if visualizeInput == 'y':
+                normalizeBoolList.append(True)
+                break
+            elif visualizeInput == 'n':
+                normalizeBoolList.append(False)
+                break
+
+    print(normalizeBoolList)
+
+    # TODO - function parameters will be changed
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
-            kmeans_decision_algo(dataframe, 3, True)
+            kmeans_decision_algo(dataframe, clusterSize, True)
             break
         elif visualizeInput == 'n':
-            kmeans_decision_algo(dataframe, 3, False)
+            kmeans_decision_algo(dataframe, clusterSize, False)
             break
 
     wholeDf = pandas.merge(df[0], df[1], on=['x', 'y'])
