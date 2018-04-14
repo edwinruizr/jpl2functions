@@ -36,6 +36,40 @@ names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
 
 
 ## FUNCTIONS
+def chris_needs_a_dataframe(df, elements, labels):
+    return_frame = df[elements]
+    return_frame['label'] = labels
+    return return_frame
+
+def normalize_choice(df, elements, norm_array):
+    return_frame = pandas.DataFrame()
+    for counter, i in enumerate(elements):
+        if(norm_array[counter] == True):
+            return_frame[i] = normalize_df(series_convertor(df[i]))
+        else:
+            return_frame[i] = df[i]
+    return return_frame
+
+def kmean(df, array_of_elements, array_of_normalization, cluster_size):
+    kmeans = KMeans(n_clusters= cluster_size, random_state=1)
+    filtered_df = normalize_choice(df[array_of_elements], array_of_elements, array_of_normalization)
+    kmeans.fit(filtered_df)
+    centers = kmeans.cluster_centers_
+    return kmeans.labels_
+
+def kmean_plot_2_val(df, xy_array, kmean_labels, cluster_size):
+    fig = plt.figure(figsize=(24,15))
+#         plt.scatter(df[x], df[y], color=c, marker='.', alpha=0.25, label=c)
+    x = xy_array[0]
+    y = xy_array[1]
+    for l, c in zip(range(cluster_size), color_array):
+        current_members = (kmean_labels == l)
+        plt.scatter(df.iloc[current_members][x], df.iloc[current_members][y], color=c, marker='.', alpha=0.25, label=c)
+    plt.xlabel(x)
+    plt.ylabel(y)
+    plt.show()
+
+
 # TODO - figure how to implement this with the choices
 def plot_hours_all(df, x, y, array_of_cols, colors):
     fileName = ''.join(array_of_cols)+''.join(colors)+x+y+'.png'
@@ -56,6 +90,49 @@ def plot_hours_all(df, x, y, array_of_cols, colors):
     plt.show()
     plt.savefig(fileName, bbox_inches='tight')
     return fileName
+
+def make3dClusterPlot(df,colors_array):
+    #for jupyter use
+    # plotly.offline.init_notebook_mode()
+
+    data = []
+
+    for i in range(len(df['label'].unique())):
+        name = df['label'].unique()[i]
+        color = colors_array[i]
+        x = df[ df['label'] == name ]['Thorium']
+        y = df[ df['label'] == name ]['Iron']
+        z = df[ df['label'] == name ]['Hydrogen']
+
+        trace = dict(
+            name = name,
+            x = x, y = y, z = z,
+            type = "scatter3d",
+            mode = 'markers',
+            marker = dict( size=1, color=color, line=dict(width=0) )
+        )
+        data.append( trace )
+
+        #cluster = dict(
+        #    color = color,
+        #    opacity = 0.0,
+        #    type = "mesh3d",
+        #    x = x, y = y, z = z )
+        #data.append( cluster )
+
+    layout = dict(
+        title = '3d point clustering',
+        scene = dict(
+        xaxis = dict( zeroline=False ),
+        yaxis = dict( zeroline=False ),
+        zaxis = dict( zeroline=False ),
+        ),
+    )
+
+    fig = dict(data=data, layout=layout)
+
+    # IPython notebook
+    plotly.offline.plot(fig, filename='3d-scatter-cluster')
 
 def make3dPlot(dataframe):
     z_data = dataframe
@@ -753,21 +830,23 @@ if 'Clustering' in respuesta['Analysis']:
     # print(normalizeBoolList)
 
     # TODO - function parameters will be changed
-    while True:
-        visualizeInput = input("Do you want to normalize the data? (y/n)")
-        if visualizeInput == 'y':
-            fileName = kmeans_decision_algo(dataframe, clusterSize, True)
-            Image.open(fileName).show()
-            break
-        elif visualizeInput == 'n':
-            fileName = kmeans_decision_algo(dataframe, clusterSize, False)
-            Image.open(fileName).show()
-            break
+    # while True:
+    #     visualizeInput = input("Do you want to normalize the data? (y/n)")
+    #     if visualizeInput == 'y':
+    #         fileName = kmeans_decision_algo(dataframe, clusterSize, True)
+    #         Image.open(fileName).show()
+    #         break
+    #     elif visualizeInput == 'n':
+    #         fileName = kmeans_decision_algo(dataframe, clusterSize, False)
+    #         Image.open(fileName).show()
+    #         break
+    wholeDf = df[0]
+    for x in range(0, len(df)-1):
+        wholeDf = pandas.merge(wholeDf, df[x+1], on=['Lat', 'Long'])
 
-    wholeDf = pandas.merge(df[0], df[1], on=['Lat', 'Long'])
 
     cAnswerLength = 0
-    while cAnswerLength!=3:
+    while cAnswerLength!=3 and cAnswerLength!=2:
         cluster = [
                      inquirer.Checkbox('Cluster',
                                        message="What 3 elements do you want to visualize?",
@@ -777,10 +856,18 @@ if 'Clustering' in respuesta['Analysis']:
         cAnswer = inquirer.prompt(cluster)
         cAnswerLength = len(cAnswer['Cluster'])
 
-
+    elementsList = []
+    for layer in answers['Layers']:
+        elementsList.append(names[layer])
+    labels = kmean(wholeDf, elementsList, normalizeBoolList, clusterSize)
     # run function with choices choosen
-    fileName = cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
-    Image.open(fileName).show()
+    if cAnswerLength == 2:
+        kmean_plot_2_val(wholeDf, cAnswer['Cluster'], labels, clusterSize)
+
+    if cAnswerLength == 3:
+        make3dClusterPlot(chris_needs_a_dataframe(wholeDf,cAnswer['Cluster'],labels),color_array)
+    # fileName =   cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
+    # Image.open(fileName).show()
 
 # TODO - is the same as the scatterplot section
 if 'Plot x vs y' in respuesta['Analysis']:
@@ -812,12 +899,15 @@ if 'Plot layer' in respuesta['Analysis']:
     # plot_3_val_normalize_individual(df[len(df)-1], 'x', False, 'y', True, names[answers['Layers'][len(df)-1]], True, 1)
 
 
+
+
+
 if '3d plot' in respuesta['Analysis']:
     fileName = plot_three_val_3d(df[0], 'Lat', 'Long', names[answers['Layers'][0]], 'blue' , 0.2)
     Image.open(fileName).show()
     print(df[0].head())
     # TODO - make3dPlot crashes
-    make3dPlot(df[0])
+    make3dPlot(df[0], color_array)
 
 
 while True:
