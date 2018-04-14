@@ -100,9 +100,9 @@ def make3dClusterPlot(df,colors_array):
     for i in range(len(df['label'].unique())):
         name = df['label'].unique()[i]
         color = colors_array[i]
-        x = df[ df['label'] == name ]['Thorium']
-        y = df[ df['label'] == name ]['Iron']
-        z = df[ df['label'] == name ]['Hydrogen']
+        x = df[ df['label'] == name ][list(df)[0]]
+        y = df[ df['label'] == name ][list(df)[1]]
+        z = df[ df['label'] == name ][list(df)[2]]
 
         trace = dict(
             name = name,
@@ -132,7 +132,7 @@ def make3dClusterPlot(df,colors_array):
     fig = dict(data=data, layout=layout)
 
     # IPython notebook
-    plotly.offline.plot(fig, filename='3d-scatter-cluster')
+    plotly.offline.plot(fig, filename='3d-scatter-cluster.html')
 
 def make3dPlot(dataframe):
     z_data = dataframe
