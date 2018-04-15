@@ -230,10 +230,12 @@ def cluster_visualizer(df, col_one, col_two, col_three, cluster_size):
 
 # end of clustering FUNCTIONS
 
+#check
 def series_convertor(x):
     if isinstance(x, pandas.Series):
         return x.to_frame()
 
+#check
 def normalize_df(df):
     MMS = preprocessing.MinMaxScaler()
     normalized = MMS.fit_transform(df)
@@ -248,6 +250,7 @@ def norm(df):
     n.columns = df.columns
     return n
 
+#check
 def plot_x_y_normalize_all(df, x, y, normalizer, opacity):
     if normalizer == True:
         normed = "Normalized"
@@ -268,6 +271,7 @@ def plot_x_y_normalize_all(df, x, y, normalizer, opacity):
     plt.show()
     return fileName
 
+#check
 def plot_x_y_normalize_individual(df, x, normalize_x, y, normalize_y, opacity):
     if normalize_x == True:
         normedX = "Normalized"
@@ -296,7 +300,7 @@ def plot_x_y_normalize_individual(df, x, normalize_x, y, normalize_y, opacity):
     plt.show()
     return fileName
 
-
+#check
 def plot_3_val_normalize_all(df, col_one, col_two, col_three, normalizer, opacity):
     if normalizer == True:
         normed = "AllNormalized"
@@ -316,7 +320,7 @@ def plot_3_val_normalize_all(df, col_one, col_two, col_three, normalizer, opacit
     plt.show()
     return fileName
 
-
+#check
 def plot_3_val_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, opacity):
     if x_norm == True:
         normedx = "Normalized"
@@ -355,6 +359,7 @@ def plot_3_val_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, opacity
     plt.show()
     return fileName
 
+#check
 def plot_three_val_3d(df, x, y, z, color, alpha):
     fileName = ''.join(list(df)) + x + y + z + color + str(alpha) +'3Dscatterplot.png'
     if os.path.isfile(fileName):
@@ -371,6 +376,60 @@ def plot_three_val_3d(df, x, y, z, color, alpha):
     plt.savefig(fileName, dpi=300, bbox_inches='tight')
     plt.show()
     return fileName
+
+'''
+I started adding here
+
+'''
+def plot_3_val_3d_normalize_all(df, x, y, z, normalize, color, alpha):
+    if(normalize == True):
+        df = normalize_df(df)
+    fig = plt.figure(figsize = (20,15))
+    ax = fig.add_subplot(111, projection='3d')
+    p = ax.scatter(df[x], df[y], df[z], alpha = alpha, marker = '.', c = color)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel(z)
+    if(type(color) != str):
+        fig.colorbar(p)
+    plt.show()
+
+def plot_3_val_3d_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, color, opacity):
+    if(x_norm == True):
+        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
+        x = 'Normalized ' + x
+    if(y_norm == True):
+        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
+        y = 'Normalized ' + y
+    if(z_norm == True):
+        df['Normalized ' + z] = normalize_df(series_convertor(df[z])).values
+        z = 'Normalized ' + z
+    fig = plt.figure(figsize = (20, 15))
+    ax = fig.add_subplot(111, projection='3d')
+    p = ax.scatter(df[x], df[y], df[z], alpha = opacity, marker = '.', c = color)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel(z)
+    plt.show()
+
+def kmean_plot(df, xyz_array, kmean_labels, cluster_size):
+    fig = plt.figure(figsize=(24,15))
+    ax = fig.gca(projection='3d')
+    x = xyz_array[0]
+    y = xyz_array[1]
+    z = xyz_array[2]
+    for l, c in zip(range(cluster_size), color_array):
+        current_members = (kmean_labels == l)
+        ax.scatter(df.iloc[current_members][x], df.iloc[current_members][y], df.iloc[current_members][z], color=c, marker='.', alpha=0.25, label=c)
+    ax.set_xlabel(x)
+    ax.set_xlabel(y)
+    ax.set_xlabel(z)
+    ax.legend()
+    ax.set_title('Clustering displayed in ' + x + ' ' + y + ' ' + z + ' space')
+    
+'''
+Ended here
+'''
 
 def plotHistogram(df, binNumbers):
     fileName = df.columns.values.tolist()[-1] + 'HistogramWith' + str(binNumbers) + 'Bins.png'
@@ -1058,6 +1117,11 @@ while True:
         hour23.columns = names
         completeDataframe = completeDataframe.merge(hour23,left_on=["Longitude", "Latitude"],right_on=["Longitude", "Latitude"],how="outer")
 
+        temp_cols = ['Temp00', 'Temp01', 'Temp02', 'Temp03', 'Temp04', 'Temp05', 'Temp06','Temp07', 'Temp08', 'Temp09', 'Temp10', 'Temp11', 'Temp12', 'Temp13','Temp14', 'Temp15', 'Temp16', 'Temp17', 'Temp18', 'Temp19', 'Temp20', 'Temp21', 'Temp22', 'Temp23']
+
+        for col in temp_cols:
+            completeDataframe[col] = completeDataframe[col].interpolate(method='linear')
+        
         fileName = plot_hours_all(completeDataframe, 'Longitude', 'Latitude', completeDataframe.columns[2:26], color_array)
         Image.open(fileName).show()
         break
