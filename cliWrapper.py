@@ -136,15 +136,15 @@ def make3dClusterPlot(df,colors_array):
         borderwidth=2
         ),
         scene = dict(
-        xaxis = dict( zeroline=False ),
-        yaxis = dict( zeroline=False ),
-        zaxis = dict( zeroline=False ),
+        xaxis = dict( title=list(df_out)[0], zeroline=False ),
+        yaxis = dict( title=list(df_out)[1], zeroline=False ),
+        zaxis = dict( title=list(df_out)[2], zeroline=False ),
         ),
     )
 
     fig = dict(data=data, layout=layout)
 
-    # IPython notebook
+    # plots and opens html page
     plotly.offline.plot(fig, filename='3d-scatter-cluster.html')
 
 def make3dPlot(dataframe):
