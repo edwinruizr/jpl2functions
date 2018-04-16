@@ -109,7 +109,7 @@ def make3dClusterPlot(df,colors_array):
             x = x, y = y, z = z,
             type = "scatter3d",
             mode = 'markers',
-            marker = dict( size=1, color=color, line=dict(width=0) )
+            marker = dict( size=4, color=color, line=dict(width=0) )
         )
         data.append( trace )
 
@@ -122,6 +122,19 @@ def make3dClusterPlot(df,colors_array):
 
     layout = dict(
         title = '3d point clustering',
+        legend=dict(
+        x=0.75,
+        y=1,
+        traceorder='normal',
+        font=dict(
+            family='sans-serif',
+            size=15,
+            color='#000'
+        ),
+        bgcolor='#E2E2E2',
+        bordercolor='#FFFFFF',
+        borderwidth=2
+        ),
         scene = dict(
         xaxis = dict( zeroline=False ),
         yaxis = dict( zeroline=False ),
