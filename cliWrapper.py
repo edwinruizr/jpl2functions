@@ -36,7 +36,7 @@ names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
 
 
 ## FUNCTIONS
-def chris_needs_a_dataframe(df, elements, labels):
+def dataframe_label_assign(df, elements, labels):
     return_frame = df[elements]
     return_frame['label'] = labels
     return return_frame
@@ -91,6 +91,48 @@ def plot_hours_all(df, x, y, array_of_cols, colors):
     plt.savefig(fileName, bbox_inches='tight')
     return fileName
 
+def make3dPlot(df,xcol,ycol,zcol,color,alpha):
+    #for jupyter use
+    #plotly.offline.init_notebook_mode()
+
+    data = []
+    
+    trace = dict(
+        name = 'point',
+        x = df[xcol], y = df[ycol], z = df[zcol],
+        type = "scatter3d",    
+        mode = 'markers',
+        marker = dict( opacity=alpha, size=4, color=color, line=dict(width=0) )
+    )
+    data.append( trace )
+
+    layout = dict(
+        title = 'Plot of ' + xcol + '(x) ' + ycol + '(y) ' + zcol + '(z)',
+        legend=dict(
+        x=0.75,
+        y=1,
+        traceorder='normal',
+        font=dict(
+            family='sans-serif',
+            size=15,
+            color='#000'
+        ),
+        bgcolor='#E2E2E2',
+        bordercolor='#FFFFFF',
+        borderwidth=2
+        ),
+        scene = dict(
+        xaxis = dict( title=xcol, zeroline=False ),
+        yaxis = dict( title=ycol, zeroline=False ),
+        zaxis = dict( title=zcol, zeroline=False ),
+        ),
+    )
+
+    fig = dict(data=data, layout=layout)
+
+    # plots and opens html page
+    plotly.offline.plot(fig, filename='3d-scatter-plot.html')
+    
 def make3dClusterPlot(df,colors_array):
     #for jupyter use
     # plotly.offline.init_notebook_mode()
@@ -121,7 +163,7 @@ def make3dClusterPlot(df,colors_array):
         #data.append( cluster )
 
     layout = dict(
-        title = '3d point clustering',
+        title = 'Cluster Plot of ' + list(df_out)[0] + '(x) ' + list(df_out)[1] + '(y) ' + list(df_out)[2] + '(z)',
         legend=dict(
         x=0.75,
         y=1,
@@ -146,29 +188,6 @@ def make3dClusterPlot(df,colors_array):
 
     # plots and opens html page
     plotly.offline.plot(fig, filename='3d-scatter-cluster.html')
-
-def make3dPlot(dataframe):
-    z_data = dataframe
-    colnames = (dataframe.columns.values)
-    data = [
-       go.Surface(
-           z=z_data.as_matrix()
-       )
-    ]
-    layout = go.Layout(
-       title=colnames[2],
-       autosize=False,
-       width=500,
-       height=500,
-       margin=dict(
-           l=65,
-           r=50,
-           b=65,
-           t=90
-       )
-    )
-    fig = go.Figure(data=data, layout=layout)
-    plot(fig)
 
 # clustering FUNCTIONS
 def kmeans_decision_algo(df, cluster, normalized):
@@ -937,7 +956,7 @@ if 'Clustering' in respuesta['Analysis']:
         kmean_plot_2_val(wholeDf, cAnswer['Cluster'], labels, clusterSize)
 
     if cAnswerLength == 3:
-        make3dClusterPlot(chris_needs_a_dataframe(wholeDf,cAnswer['Cluster'],labels),color_array)
+        make3dClusterPlot(dataframe_label_assign(wholeDf,cAnswer['Cluster'],labels),color_array)
     # fileName =   cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
     # Image.open(fileName).show()
 
