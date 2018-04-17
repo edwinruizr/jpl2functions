@@ -994,11 +994,9 @@ if 'Plot layer' in respuesta['Analysis']:
 
 
 if '3d plot' in respuesta['Analysis']:
-    fileName = plot_three_val_3d(df[0], 'Lat', 'Long', names[answers['Layers'][0]], 'blue' , 0.2)
+    fileName = make3dPlot(df[0], 'Lat', 'Long', names[answers['Layers'][0]], 'blue' , 0.2)
     Image.open(fileName).show()
     print(df[0].head())
-    # TODO - make3dPlot crashes
-    make3dPlot(df[0], color_array)
 
 
 while True:
