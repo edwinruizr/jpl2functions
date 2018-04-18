@@ -1183,8 +1183,8 @@ while True:
         for col in temp_cols:
             completeDataframe[col] = completeDataframe[col].interpolate(method='linear')
         
-		subsampleDF = dataframeSubsampler(completeDataframe,5)
-		plotAllTemp(subsampleDF,'Longitude','Latitude',subsampleDF.columns[2:26],color_array)
+        subsampleDF = dataframeSubsampler(completeDataframe,5)
+        plotAllTemp(subsampleDF,'Longitude','Latitude',subsampleDF.columns[2:26],color_array)
         break
     elif visualizeTemp == 'n':
         print("bless your soul!")
