@@ -20,6 +20,7 @@ from PIL import Image
 
 
 
+
 color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
                '#551B8C', '#B5651E', '#614051', '#669999', '#3B7A57',
               '#007FFF', '#8A0303', '#44D7A8', '#F0E130', '#007BA7',
@@ -30,43 +31,12 @@ color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
 names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
     'LP_GRS_Fe_Global_2ppd.tif': 'Iron',
     'LP_GRS_H_Global_2ppd.tif' : 'Hydrogen',
-    'resizedLOLA.xyz' : 'LOLA value',
-    'temp_avg_hour00.xyz' : 'Temp Hour 00',
-    'temp_avg_hour01.xyz' : 'Temp Hour 01',
-    'temp_avg_hour02.xyz' : 'Temp Hour 02',
-    'temp_avg_hour03.xyz' : 'Temp Hour 03',
-    'temp_avg_hour04.xyz' : 'Temp Hour 04',
-    'temp_avg_hour05.xyz' : 'Temp Hour 05',
-    'temp_avg_hour06.xyz' : 'Temp Hour 06',
-    'temp_avg_hour07.xyz' : 'Temp Hour 07',
-    'temp_avg_hour08.xyz' : 'Temp Hour 08',
-    'temp_avg_hour09.xyz' : 'Temp Hour 09',
-    'temp_avg_hour10.xyz' : 'Temp Hour 10',
-    'temp_avg_hour11.xyz' : 'Temp Hour 11',
-    'temp_avg_hour12.xyz' : 'Temp Hour 12',
-    'temp_avg_hour13.xyz' : 'Temp Hour 13',
-    'temp_avg_hour14.xyz' : 'Temp Hour 14',
-    'temp_avg_hour15.xyz' : 'Temp Hour 15',
-    'temp_avg_hour16.xyz' : 'Temp Hour 16',
-    'temp_avg_hour17.xyz' : 'Temp Hour 17',
-    'temp_avg_hour18.xyz' : 'Temp Hour 18',
-    'temp_avg_hour19.xyz' : 'Temp Hour 19',
-    'temp_avg_hour20.xyz' : 'Temp Hour 20',
-    'temp_avg_hour21.xyz' : 'Temp Hour 21',
-    'temp_avg_hour22.xyz' : 'Temp Hour 22',
-    'temp_avg_hour23.xyz' : 'Temp Hour 23'
+    'resizedLOLA.xyz' : 'LOLA value'
     }
 
 
 ## FUNCTIONS
-
-# subsamples dataframe by percent, ie subsamplePercent = 5 means 5% of values in dataframe
-def dataframeSubsampler(df,subsamplePercent):
-    subsampleVal = 100/subsamplePercent
-    df_out = df[0::int(subsampleVal)]
-    return df_out
-
-def dataframe_label_assign(df, elements, labels):
+def chris_needs_a_dataframe(df, elements, labels):
     return_frame = df[elements]
     return_frame['label'] = labels
     return return_frame
@@ -101,91 +71,25 @@ def kmean_plot_2_val(df, xy_array, kmean_labels, cluster_size):
 
 
 # TODO - figure how to implement this with the choices
-def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
-    #for jupyter use
-    #plotly.offline.init_notebook_mode()
+def plot_hours_all(df, x, y, array_of_cols, colors):
+    fileName = ''.join(array_of_cols)+''.join(colors)+x+y+'.png'
+    if os.path.isfile(fileName):
+        return fileName
 
-    data = []
-
+    completeDataframe.head()
+    fig = plt.figure(figsize = (20,15))
+    ax = fig.add_subplot(111, projection='3d')
     for counter, i in enumerate(array_of_cols):
-
-        trace = dict(
-            name = i,
-            x = df[xcol], y = df[ycol], z = df[i],
-            type = "scatter3d",
-            mode = 'markers',
-            marker = dict( opacity=0.9, size=4, color=color_array[counter], line=dict(width=0) )
-        )
-        data.append( trace )
-
-    layout = dict(
-        title = 'Plot of all Temperatures',
-        legend=dict(
-        x=0.75,
-        y=1,
-        traceorder='normal',
-        font=dict(
-            family='sans-serif',
-            size=15,
-            color='#000'
-        ),
-        bgcolor='#E2E2E2',
-        bordercolor='#FFFFFF',
-        borderwidth=2
-        ),
-        scene = dict(
-        xaxis = dict( title=xcol, zeroline=False ),
-        yaxis = dict( title=ycol, zeroline=False ),
-        zaxis = dict( title='Z value', zeroline=False ),
-        ),
-    )
-
-    fig = dict(data=data, layout=layout)
-
-    # plots and opens html page
-    plotly.offline.plot(fig, filename='3d-temp-plot.html')
-
-def make3dPlot(df,xcol,ycol,zcol,color,alpha):
-    #for jupyter use
-    #plotly.offline.init_notebook_mode()
-
-    data = []
-
-    trace = dict(
-        name = 'point',
-        x = df[xcol], y = df[ycol], z = df[zcol],
-        type = "scatter3d",
-        mode = 'markers',
-        marker = dict( opacity=alpha, size=4, color=color, line=dict(width=0) )
-    )
-    data.append( trace )
-
-    layout = dict(
-        title = 'Plot of ' + xcol + '(x) ' + ycol + '(y) ' + zcol + '(z)',
-        legend=dict(
-        x=0.75,
-        y=1,
-        traceorder='normal',
-        font=dict(
-            family='sans-serif',
-            size=15,
-            color='#000'
-        ),
-        bgcolor='#E2E2E2',
-        bordercolor='#FFFFFF',
-        borderwidth=2
-        ),
-        scene = dict(
-        xaxis = dict( title=xcol, zeroline=False ),
-        yaxis = dict( title=ycol, zeroline=False ),
-        zaxis = dict( title=zcol, zeroline=False ),
-        ),
-    )
-
-    fig = dict(data=data, layout=layout)
-
-    # plots and opens html page
-    plotly.offline.plot(fig, filename='3d-scatter-plot.html')
+        p = ax.scatter(df[x], df[y], df[i], alpha = 0.25, c = colors[counter], label=i)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel('Temp')
+    plt.legend()
+    plt.title(x + ' vs ' + y)
+    print(array_of_cols)
+    plt.show()
+    plt.savefig(fileName, bbox_inches='tight')
+    return fileName
 
 def make3dClusterPlot(df,colors_array):
     #for jupyter use
@@ -217,7 +121,7 @@ def make3dClusterPlot(df,colors_array):
         #data.append( cluster )
 
     layout = dict(
-        title = 'Cluster Plot of ' + list(df)[0] + '(x) ' + list(df)[1] + '(y) ' + list(df)[2] + '(z)',
+        title = '3d point clustering',
         legend=dict(
         x=0.75,
         y=1,
@@ -242,6 +146,29 @@ def make3dClusterPlot(df,colors_array):
 
     # plots and opens html page
     plotly.offline.plot(fig, filename='3d-scatter-cluster.html')
+
+def make3dPlot(dataframe):
+    z_data = dataframe
+    colnames = (dataframe.columns.values)
+    data = [
+       go.Surface(
+           z=z_data.as_matrix()
+       )
+    ]
+    layout = go.Layout(
+       title=colnames[2],
+       autosize=False,
+       width=500,
+       height=500,
+       margin=dict(
+           l=65,
+           r=50,
+           b=65,
+           t=90
+       )
+    )
+    fig = go.Figure(data=data, layout=layout)
+    plot(fig)
 
 # clustering FUNCTIONS
 def kmeans_decision_algo(df, cluster, normalized):
@@ -463,6 +390,59 @@ def plot_three_val_3d(df, x, y, z, color, alpha):
     plt.show()
     return fileName
 
+'''
+I started adding here
+
+'''
+def plot_3_val_3d_normalize_all(df, x, y, z, normalize, color, alpha):
+    if(normalize == True):
+        df = normalize_df(df)
+    fig = plt.figure(figsize = (20,15))
+    ax = fig.add_subplot(111, projection='3d')
+    p = ax.scatter(df[x], df[y], df[z], alpha = alpha, marker = '.', c = color)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel(z)
+    if(type(color) != str):
+        fig.colorbar(p)
+    plt.show()
+
+def plot_3_val_3d_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, color, opacity):
+    if(x_norm == True):
+        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
+        x = 'Normalized ' + x
+    if(y_norm == True):
+        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
+        y = 'Normalized ' + y
+    if(z_norm == True):
+        df['Normalized ' + z] = normalize_df(series_convertor(df[z])).values
+        z = 'Normalized ' + z
+    fig = plt.figure(figsize = (20, 15))
+    ax = fig.add_subplot(111, projection='3d')
+    p = ax.scatter(df[x], df[y], df[z], alpha = opacity, marker = '.', c = color)
+    ax.set_xlabel(x)
+    ax.set_ylabel(y)
+    ax.set_zlabel(z)
+    plt.show()
+
+def kmean_plot(df, xyz_array, kmean_labels, cluster_size):
+    fig = plt.figure(figsize=(24,15))
+    ax = fig.gca(projection='3d')
+    x = xyz_array[0]
+    y = xyz_array[1]
+    z = xyz_array[2]
+    for l, c in zip(range(cluster_size), color_array):
+        current_members = (kmean_labels == l)
+        ax.scatter(df.iloc[current_members][x], df.iloc[current_members][y], df.iloc[current_members][z], color=c, marker='.', alpha=0.25, label=c)
+    ax.set_xlabel(x)
+    ax.set_xlabel(y)
+    ax.set_xlabel(z)
+    ax.legend()
+    ax.set_title('Clustering displayed in ' + x + ' ' + y + ' ' + z + ' space')
+
+'''
+Ended here
+'''
 
 def plotHistogram(df, binNumbers):
     fileName = df.columns.values.tolist()[-1] + 'HistogramWith' + str(binNumbers) + 'Bins.png'
@@ -509,13 +489,9 @@ def plot(df, xname, yname):
 
 # input file (tif or xyz) -> output pandas dataframe
 def fileToDataframe(file):
-    if '.xyz' in file:
-        df = pandas.DataFrame(pandas.read_csv(file, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
-        df.columns =['x', 'y', names[file]]
-    else:
-        df = gr.from_file(file).to_pandas()
-        df = df[["x", "y", "value"]].copy()
-        df.columns = ["x", "y", names[file]]
+    df = gr.from_file(file).to_pandas()
+    df = df[["x", "y", "value"]].copy()
+    df.columns = ["x", "y", names[file]]
     return df
 
 
@@ -609,9 +585,167 @@ def visualizeCovariance(listOfDataframes, norm = False):
     plt.show()
     return fileName
 
-def logAndCorrelation(element1, element2, element3, row, column):
+###ONE LAYER VISUAL###
+def logAndCorrelation1(element1, rows, column, bins):
+    element1Value = ""
+
+    for key in element1.keys():
+        if key != 'Lat' and key!='Long':
+            element1Value = key
+    fileName = element1Value + str(row*column) +'SubsectionsLogAndCorrelationPlot.png'
+    if os.path.isfile(fileName):
+        return fileName
+
+    xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
+    yRange_e1 = element1['Long'].max() - element1['Long'].min()
+    section_e1 = math.ceil(xRange_e1/row)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/column)
+    min_e1 = element1['Lat'].min()
+    max_e1 = element1['Lat'].max()
+    ymin_e1 = element1['Long'].min()
+    ymax_e1 = element1['Long'].max()
+
+    e1_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
+    e1_log_arr = []
+    for key, value in e1_d.items():
+        e1_key_std = numpy.std(e1_d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+    #Histogram
+    plt.figure(1)
+    plt.subplot(2,2,1)
+    plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
+    plt.xlabel(r'$log(\sigma_1)$')
+    plt.ylabel(r'Frequency')
+    plt.hist(e1_log_arr, bins)
+    #Variance
+    e1_Var = numpy.var(e1_d[key][element1Value])
+    plt.subplot(2,2,2)
+    plt.title(r'$Frequency\ vs\ Effective\ Variance$')
+    plt.xlabel(r'$Effective Variance$')
+    plt.ylabel(r'Frequency')
+    plt.hist(e1_Var, bins)
+    plt.show()
+    return fileName
+###END OF ONE LAYER###
+
+###TWO LAYER VISUAL###
+def logAndCorrelation2(element1, element2, row, column, bins):
+    element1Value = ""
+    element2Value = ""
+
+    for key in element1.keys():
+        if key != 'Lat' and key!='Long':
+            element1Value = key
+    for key in element2.keys():
+        if key != 'Lat' and key!='Long':
+            element2Value = key
+
+    fileName = element1Value + element2Value + str(row*column) +'SubsectionsLogAndCorrelationPlot.png'
+    if os.path.isfile(fileName):
+        return fileName
+
+    xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
+    yRange_e1 = element1['Long'].max() - element1['Long'].min()
+    xRange_e2 = element2['Lat'].max() - element2['Lat'].min()
+    yRange_e2 = element2['Long'].max() - element2['Long'].min()
+
+    section_e1 = math.ceil(xRange_e1/row)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/column)
+    section_e2 = math.ceil(xRange_e2/row)
+    ySection_e2 = math.ceil(yRange_e2/column)
+
+    min_e1 = element1['Lat'].min()
+    max_e1 = element1['Lat'].max()
+    min_e2 = element2['Lat'].min()
+    max_e2 = element2['Lat'].max()
+    ymin_e1 = element1['Long'].min()
+    ymax_e1 = element1['Long'].max()
+    ymin_e2 = element2['Long'].min()
+    ymax_e2 = element2['Long'].max()
+
+    e1_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
+    e1_log_arr = []
+    for key, value in e1_d.items():
+        e1_key_std = numpy.std(e1_d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+    e2_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e2_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['Lat']) & (element2['Lat'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['Long']) & (element2['Long'] < ymin_e2+(y+1)*ySection_e2)]
+
+    e2_log_arr = []
+    for key, value in e2_d.items():
+        e2_key_std = numpy.std(e2_d[key][element2Value])
+        e2_key_log = numpy.log(e2_key_std)
+        e2_log_arr.append(e2_key_log)
+
+    # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
+    plt.subplot(2,2,1)
+    plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
+    plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
+    plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
+    plt.scatter(e2_log_arr, e1_log_arr)
+
+    ##### Correlation part #####
+    el1 = element1.corr()
+    el2 = element2.corr()
+
+    first_el = el1[element1Value]
+    second_el = el2[element2Value]
+
+    # p12 correlation
+    correlation = numpy.corrcoef(el1, el2)
+
+    # This loops through the correlation matrix and puts all the points into a single array. (Correlation matrix is 6x6 and corr_d will have a size of 36)
+    corr_d=[]
+    for x in range(0, len(correlation)):
+        for y in range(0, len(correlation)):
+            corr_d.append(correlation[x][y])
+
+    # This will change the size of e1_log_arr to have the same size as correlation (in order to plot on graph)
+    d={}
+    for x in range(0,6):
+        for y in range(0,6):
+            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+
+    # Will contain the log(standard deviation) of each value (Using this for correlation scatterplot)
+    e1_log_arr = []
+    for key, value in d.items():
+        e1_key_std = numpy.std(d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+    # Graph to show element1 vs p12
+    plt.subplot(2,2,2)
+    plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
+    plt.scatter(corr_d, e1_log_arr)
+
+    #Histograms
+    plt.subplot(2,2,4)
+    plt.title(r'$Frequency\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'Frequency')
+    plt.hist(corr_d, bins)
+    plt.show()
+    return fileName
+###END OF TWO LAYER###
 
 
+###THREE LAYER VISUAL###
+def logAndCorrelation3(element1, element2, element3, row, column, bins):
     element1Value = ""
     element2Value = ""
     element3Value = ""
@@ -619,11 +753,9 @@ def logAndCorrelation(element1, element2, element3, row, column):
     for key in element1.keys():
         if key != 'Lat' and key!='Long':
             element1Value = key
-
     for key in element2.keys():
         if key != 'Lat' and key!='Long':
             element2Value = key
-
     for key in element3.keys():
         if key!= 'Lat' and key!='Long':
             element3Value = key
@@ -632,16 +764,12 @@ def logAndCorrelation(element1, element2, element3, row, column):
     if os.path.isfile(fileName):
         return fileName
 
-
     xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
     yRange_e1 = element1['Long'].max() - element1['Long'].min()
-
     section_e1 = math.ceil(xRange_e1/row)         # length specified by user
     ySection_e1 = math.ceil(yRange_e1/column)
-
     min_e1 = element1['Lat'].min()
     max_e1 = element1['Lat'].max()
-
     ymin_e1 = element1['Long'].min()
     ymax_e1 = element1['Long'].max()
 
@@ -707,7 +835,7 @@ def logAndCorrelation(element1, element2, element3, row, column):
 
 
     # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
-    plt.subplot(2,2,1)
+    plt.subplot(4,2,2)
     plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
     plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
     plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
@@ -737,7 +865,6 @@ def logAndCorrelation(element1, element2, element3, row, column):
         for y in range(0,6):
             d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
 
-
     # Will contain the log(standard deviation) of each value (Using this for correlation scatterplot)
     e1_log_arr = []
     for key, value in d.items():
@@ -747,7 +874,7 @@ def logAndCorrelation(element1, element2, element3, row, column):
 
     # Graph to show element1 vs p12
 
-    plt.subplot(2,2,2)
+    plt.subplot(4,2,5)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
@@ -757,39 +884,54 @@ def logAndCorrelation(element1, element2, element3, row, column):
 
     # p23 correlation
     correlation2 = numpy.corrcoef(el2, el3)
-
     corr_d2=[]
     for x in range(0, len(correlation2)):
         for y in range(0, len(correlation2)):
             corr_d2.append(correlation2[x][y])
+    #p13 correlation
+    correlation3 = numpy.corrcoef(el1, el3)
+    corr_d3=[]
+    for x in range(0, len(correlation2)):
+        for y in range(0, len(correlation3)):
+            corr_d3.append(correlation2[x][y])
 
     #Graph to show element1 vs p23
-
-    plt.subplot(2,2,3)
+    plt.subplot(4,2,8)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
     plt.scatter(corr_d2, e1_log_arr)
 
-
     #Graph to show p12 vs p23
-
-    plt.subplot(2,2,4)
+    plt.subplot(4,2,11)
     plt.title(r'$\rho_{12}\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'$\rho_{12}$')
     plt.scatter(corr_d2, corr_d)
-    plt.tight_layout()
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
+
+    plt.subplot(4,2,1)
+    plt.title(r'$Frequency\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'Frequency')
+    plt.hist(corr_d, bins)
+    plt.subplot(4,2,4)
+    plt.title(r'$Frequency\ vs\ \rho_{23}$')
+    plt.xlabel(r'$\rho_{23}$')
+    plt.ylabel(r'Frequency')
+    plt.hist(corr_d2, bins)
+
+    fig = plt.figure(2)
+    ax = Axes3D(fig)
+    ax.scatter(corr_d, corr_d2, corr_d3)
+    ax.set_xlabel(r'$\rho_{12}$')
+    ax.set_ylabel(r'$\rho_{23}$')
+    ax.set_zlabel(r'$\rho_{13}$')
     plt.show()
     return fileName
+###END OF THREE LAYER###
+
 
 ## END OF FUNCTIONS
-
-
-
-
-
 
 
 questions = [
@@ -812,22 +954,22 @@ for answer in answers['Layers']:
 
 
 if len(df) == 2:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Scatter Plot', 'Plot x vs y']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Scatter Plot', 'Plot x vs y', 'Visualization Graphs(2)']
 # chose multiple layers442
 elif len(df) > 1:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Log/Correlation Graph']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Visualization Graphs(3)']
 # didn't choose any
 elif len(df) == 0:
     print("You didn't choose any layers. Exiting.")
     exit(0)
 # they chose 1 layer
 else:
-    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot', 'Clustering']
+    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot', 'Visualization Graphs(1)']
 
 
 analysis = [
              inquirer.Checkbox('Analysis',
-                               message="What kinds of analysis do you want to run on the layers chosen?",
+                               message="What kinds of ananlysis do you want to run on the layers chosen?",
                                choices= choicesList,
                                ),
              ]
@@ -836,11 +978,11 @@ respuesta = inquirer.prompt(analysis)
 
 dataframe = aggregateValues(df)
 
-#done
+
 if 'Stats' in respuesta['Analysis']:
     print(getStats(df))
 
-#done
+
 if 'Covariance' in respuesta['Analysis']:
     aggregatedDataframe = aggregateValues(df)
     while True:
@@ -852,18 +994,18 @@ if 'Covariance' in respuesta['Analysis']:
             Image.open(visualizeCovariance(df, norm = False)).show()
             break
 
-#done
+
 if 'Correlation' in respuesta['Analysis']:
     # normalization doesn't matter (produces the same output)
     img = Image.open(visualizeCorrelation(df))
     img.show()
 
-#done
+
 if 'Variance' in respuesta['Analysis']:
     img = Image.open(visualizeVariance(dataframe, names[answers['Layers'][0]]))
     img.show()
 
-#done
+
 if 'Histogram' in respuesta['Analysis']:
     try:
         bins = int(input("How many bins for histogram (minimum 10)?"))
@@ -884,11 +1026,13 @@ if 'Scatter Plot' in respuesta['Analysis']:
     fileName = plot(dataframe.sample(n=2000),names[answers['Layers'][0]],names[answers['Layers'][1]])
     Image.open(fileName).show()
 
-if 'Log/Correlation Graph' in respuesta['Analysis']:
+###ONE LAYER VISUAL###
+if 'Visualization Graphs(1)' in respuesta['Analysis']:
     # To show up the first time
     row = int(input("How many rows for matrix? "))
     column = int(input("How many columns for matrix? "))
-    logAndCorrelation(df[0], df[1], df[2], row, column)
+    bins = int(input("How many bins? "))
+    logAndCorrelation1(df[0], row, column, bins)
 
     # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
     # Also to allow user to exit if they want to stop looking at graphs
@@ -897,13 +1041,59 @@ if 'Log/Correlation Graph' in respuesta['Analysis']:
         if userChoice == 'y':
             row = int(input("How many rows for matrix? "))
             column = int(input("How many columns for matrix? "))
-            fileName = logAndCorrelation(df[0], df[1], df[2], row, column)
+            bins = int(input("How many bins? "))
+            fileName = logAndCorrelation1(df[0], row, column, bins)
             Image.open(fileName).show()
         elif userChoice == 'n':
             exit(0)
+###END OF ONE LAYER VISUAL###
+
+###TWO LAYERS VISUAL###
+if 'Visualization Graphs(2)' in respuesta['Analysis']:
+    # To show up the first time
+    row = int(input("How many rows for matrix? "))
+    column = int(input("How many columns for matrix? "))
+    bins = int(input("How many bins? "))
+    logAndCorrelation2(df[0], df[1], row, column, bins)
+
+    # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
+    # Also to allow user to exit if they want to stop looking at graphs
+    while True:
+        userChoice = input("\nWould you like to continue to view graphs? (y/n)")
+        if userChoice == 'y':
+            row = int(input("How many rows for matrix? "))
+            column = int(input("How many columns for matrix? "))
+            bins = int(input("How many bins? "))
+            fileName = logAndCorrelation2(df[0], df[1], row, column, bins)
+            Image.open(fileName).show()
+        elif userChoice == 'n':
+            exit(0)
+##END OF TWO LAYER VISUAL##
+
+###THREE LAYER VISUAL###
+if 'Visualization Graphs(3)' in respuesta['Analysis']:
+    # To show up the first time
+    row = int(input("How many rows for matrix? "))
+    column = int(input("How many columns for matrix? "))
+    bins = int(input("How many bins? "))
+    logAndCorrelation3(df[0], df[1], df[2], row, column, bins)
+
+    # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
+    # Also to allow user to exit if they want to stop looking at graphs
+    while True:
+        userChoice = input("\nWould you like to continue to view graphs? (y/n)")
+        if userChoice == 'y':
+            row = int(input("How many rows for matrix? "))
+            column = int(input("How many columns for matrix? "))
+            bins = int(input("How many bins? "))
+            fileName = logAndCorrelation3(df[0], df[1], df[2], row, column, bins)
+            Image.open(fileName).show()
+        elif userChoice == 'n':
+            exit(0)
+###END OF THREE LAYER VISUAL###
 
 # clustering
-# TODO NEEDS TO TAKE IN SOME OTHER STUFF, LIKE COLUMN NAMES, NEED TO BE ABLE TO READ IN FUTURE DATAFRAMES
+# TODO - crashes if 2 files are choosen
 if 'Clustering' in respuesta['Analysis']:
     # ask for number of clusters
     while True:
@@ -943,12 +1133,9 @@ if 'Clustering' in respuesta['Analysis']:
     #         break
     wholeDf = df[0]
     for x in range(0, len(df)-1):
-        wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on=['Lat', 'Long'])
+        wholeDf = pandas.merge(wholeDf, df[x+1], on=['Lat', 'Long'])
 
-    for answer in answers['Layers']:
-        wholeDf=wholeDf[wholeDf[names[answer]].notnull()]
 
-    wholeDf.to_csv('WholeDf.csv')
     cAnswerLength = 0
     while cAnswerLength!=3 and cAnswerLength!=2:
         cluster = [
@@ -969,7 +1156,7 @@ if 'Clustering' in respuesta['Analysis']:
         kmean_plot_2_val(wholeDf, cAnswer['Cluster'], labels, clusterSize)
 
     if cAnswerLength == 3:
-        make3dClusterPlot(dataframe_label_assign(wholeDf,cAnswer['Cluster'],labels),color_array)
+        make3dClusterPlot(chris_needs_a_dataframe(wholeDf,cAnswer['Cluster'],labels),color_array)
     # fileName =   cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
     # Image.open(fileName).show()
 
@@ -1004,12 +1191,12 @@ if 'Plot layer' in respuesta['Analysis']:
 
 
 
-
-
 if '3d plot' in respuesta['Analysis']:
-    fileName = make3dPlot(df[0], 'Lat', 'Long', names[answers['Layers'][0]], 'blue' , 0.2)
+    fileName = plot_three_val_3d(df[0], 'Lat', 'Long', names[answers['Layers'][0]], 'blue' , 0.2)
     Image.open(fileName).show()
     print(df[0].head())
+    # TODO - make3dPlot crashes
+    make3dPlot(df[0], color_array)
 
 
 while True:
@@ -1165,8 +1352,8 @@ while True:
         for col in temp_cols:
             completeDataframe[col] = completeDataframe[col].interpolate(method='linear')
 
-        subsampleDF = dataframeSubsampler(completeDataframe,5)
-        plotAllTemp(subsampleDF,'Longitude','Latitude',subsampleDF.columns[2:26],color_array)
+        fileName = plot_hours_all(completeDataframe, 'Longitude', 'Latitude', completeDataframe.columns[2:26], color_array)
+        Image.open(fileName).show()
         break
     elif visualizeTemp == 'n':
         print("bless your soul!")
