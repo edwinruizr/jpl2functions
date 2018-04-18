@@ -163,7 +163,7 @@ def make3dClusterPlot(df,colors_array):
         #data.append( cluster )
 
     layout = dict(
-        title = 'Cluster Plot of ' + list(df_out)[0] + '(x) ' + list(df_out)[1] + '(y) ' + list(df_out)[2] + '(z)',
+        title = 'Cluster Plot of ' + list(df)[0] + '(x) ' + list(df)[1] + '(y) ' + list(df)[2] + '(z)',
         legend=dict(
         x=0.75,
         y=1,
