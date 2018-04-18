@@ -31,7 +31,31 @@ color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
 names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
     'LP_GRS_Fe_Global_2ppd.tif': 'Iron',
     'LP_GRS_H_Global_2ppd.tif' : 'Hydrogen',
-    'resizedLOLA.xyz' : 'LOLA value'
+    'resizedLOLA.xyz' : 'LOLA value',
+    'temp_avg_hour00.xyz' : 'Temp Hour 00',
+    'temp_avg_hour01.xyz' : 'Temp Hour 01',
+    'temp_avg_hour02.xyz' : 'Temp Hour 02',
+    'temp_avg_hour03.xyz' : 'Temp Hour 03',
+    'temp_avg_hour04.xyz' : 'Temp Hour 04',
+    'temp_avg_hour05.xyz' : 'Temp Hour 05',
+    'temp_avg_hour06.xyz' : 'Temp Hour 06',
+    'temp_avg_hour07.xyz' : 'Temp Hour 07',
+    'temp_avg_hour08.xyz' : 'Temp Hour 08',
+    'temp_avg_hour09.xyz' : 'Temp Hour 09',
+    'temp_avg_hour10.xyz' : 'Temp Hour 10',
+    'temp_avg_hour11.xyz' : 'Temp Hour 11',
+    'temp_avg_hour12.xyz' : 'Temp Hour 12',
+    'temp_avg_hour13.xyz' : 'Temp Hour 13',
+    'temp_avg_hour14.xyz' : 'Temp Hour 14',
+    'temp_avg_hour15.xyz' : 'Temp Hour 15',
+    'temp_avg_hour16.xyz' : 'Temp Hour 16',
+    'temp_avg_hour17.xyz' : 'Temp Hour 17',
+    'temp_avg_hour18.xyz' : 'Temp Hour 18',
+    'temp_avg_hour19.xyz' : 'Temp Hour 19',
+    'temp_avg_hour20.xyz' : 'Temp Hour 20',
+    'temp_avg_hour21.xyz' : 'Temp Hour 21',
+    'temp_avg_hour22.xyz' : 'Temp Hour 22',
+    'temp_avg_hour23.xyz' : 'Temp Hour 23'
     }
 
 
@@ -83,13 +107,13 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
     #plotly.offline.init_notebook_mode()
 
     data = []
-    
+
     for counter, i in enumerate(array_of_cols):
-    
+
         trace = dict(
             name = i,
             x = df[xcol], y = df[ycol], z = df[i],
-            type = "scatter3d",    
+            type = "scatter3d",
             mode = 'markers',
             marker = dict( opacity=0.9, size=4, color=color_array[counter], line=dict(width=0) )
         )
@@ -127,11 +151,11 @@ def make3dPlot(df,xcol,ycol,zcol,color,alpha):
     #plotly.offline.init_notebook_mode()
 
     data = []
-    
+
     trace = dict(
         name = 'point',
         x = df[xcol], y = df[ycol], z = df[zcol],
-        type = "scatter3d",    
+        type = "scatter3d",
         mode = 'markers',
         marker = dict( opacity=alpha, size=4, color=color, line=dict(width=0) )
     )
@@ -163,7 +187,7 @@ def make3dPlot(df,xcol,ycol,zcol,color,alpha):
 
     # plots and opens html page
     plotly.offline.plot(fig, filename='3d-scatter-plot.html')
-    
+
 def make3dClusterPlot(df,colors_array):
     #for jupyter use
     # plotly.offline.init_notebook_mode()
@@ -489,7 +513,7 @@ def kmean_plot(df, xyz_array, kmean_labels, cluster_size):
     ax.set_xlabel(z)
     ax.legend()
     ax.set_title('Clustering displayed in ' + x + ' ' + y + ' ' + z + ' space')
-    
+
 '''
 Ended here
 '''
@@ -539,9 +563,13 @@ def plot(df, xname, yname):
 
 # input file (tif or xyz) -> output pandas dataframe
 def fileToDataframe(file):
-    df = gr.from_file(file).to_pandas()
-    df = df[["x", "y", "value"]].copy()
-    df.columns = ["x", "y", names[file]]
+    if '.xyz' in file:
+        df = pandas.DataFrame(pandas.read_csv(file, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        df.columns =['x', 'y', names[file]]
+    else:
+        df = gr.from_file(file).to_pandas()
+        df = df[["x", "y", "value"]].copy()
+        df.columns = ["x", "y", names[file]]
     return df
 
 
@@ -964,9 +992,12 @@ if 'Clustering' in respuesta['Analysis']:
     #         break
     wholeDf = df[0]
     for x in range(0, len(df)-1):
-        wholeDf = pandas.merge(wholeDf, df[x+1], on=['Lat', 'Long'])
+        wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on=['Lat', 'Long'])
 
+    for answer in answers['Layers']:
+        wholeDf=wholeDf[wholeDf[names[answer]].notnull()]
 
+    wholeDf.to_csv('WholeDf.csv')
     cAnswerLength = 0
     while cAnswerLength!=3 and cAnswerLength!=2:
         cluster = [
@@ -1182,7 +1213,7 @@ while True:
 
         for col in temp_cols:
             completeDataframe[col] = completeDataframe[col].interpolate(method='linear')
-        
+
         subsampleDF = dataframeSubsampler(completeDataframe,5)
         plotAllTemp(subsampleDF,'Longitude','Latitude',subsampleDF.columns[2:26],color_array)
         break
