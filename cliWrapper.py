@@ -20,7 +20,6 @@ from PIL import Image
 
 
 
-
 color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
                '#551B8C', '#B5651E', '#614051', '#669999', '#3B7A57',
               '#007FFF', '#8A0303', '#44D7A8', '#F0E130', '#007BA7',
@@ -464,59 +463,6 @@ def plot_three_val_3d(df, x, y, z, color, alpha):
     plt.show()
     return fileName
 
-'''
-I started adding here
-
-'''
-def plot_3_val_3d_normalize_all(df, x, y, z, normalize, color, alpha):
-    if(normalize == True):
-        df = normalize_df(df)
-    fig = plt.figure(figsize = (20,15))
-    ax = fig.add_subplot(111, projection='3d')
-    p = ax.scatter(df[x], df[y], df[z], alpha = alpha, marker = '.', c = color)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    ax.set_zlabel(z)
-    if(type(color) != str):
-        fig.colorbar(p)
-    plt.show()
-
-def plot_3_val_3d_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, color, opacity):
-    if(x_norm == True):
-        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
-        x = 'Normalized ' + x
-    if(y_norm == True):
-        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
-        y = 'Normalized ' + y
-    if(z_norm == True):
-        df['Normalized ' + z] = normalize_df(series_convertor(df[z])).values
-        z = 'Normalized ' + z
-    fig = plt.figure(figsize = (20, 15))
-    ax = fig.add_subplot(111, projection='3d')
-    p = ax.scatter(df[x], df[y], df[z], alpha = opacity, marker = '.', c = color)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    ax.set_zlabel(z)
-    plt.show()
-
-def kmean_plot(df, xyz_array, kmean_labels, cluster_size):
-    fig = plt.figure(figsize=(24,15))
-    ax = fig.gca(projection='3d')
-    x = xyz_array[0]
-    y = xyz_array[1]
-    z = xyz_array[2]
-    for l, c in zip(range(cluster_size), color_array):
-        current_members = (kmean_labels == l)
-        ax.scatter(df.iloc[current_members][x], df.iloc[current_members][y], df.iloc[current_members][z], color=c, marker='.', alpha=0.25, label=c)
-    ax.set_xlabel(x)
-    ax.set_xlabel(y)
-    ax.set_xlabel(z)
-    ax.legend()
-    ax.set_title('Clustering displayed in ' + x + ' ' + y + ' ' + z + ' space')
-
-'''
-Ended here
-'''
 
 def plotHistogram(df, binNumbers):
     fileName = df.columns.values.tolist()[-1] + 'HistogramWith' + str(binNumbers) + 'Bins.png'
@@ -841,6 +787,11 @@ def logAndCorrelation(element1, element2, element3, row, column):
 ## END OF FUNCTIONS
 
 
+
+
+
+
+
 questions = [
              inquirer.Checkbox('Layers',
                                message="What layers do you want to analyze?",
@@ -871,12 +822,12 @@ elif len(df) == 0:
     exit(0)
 # they chose 1 layer
 else:
-    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot']
+    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot', 'Clustering']
 
 
 analysis = [
              inquirer.Checkbox('Analysis',
-                               message="What kinds of ananlysis do you want to run on the layers chosen?",
+                               message="What kinds of analysis do you want to run on the layers chosen?",
                                choices= choicesList,
                                ),
              ]
@@ -885,11 +836,11 @@ respuesta = inquirer.prompt(analysis)
 
 dataframe = aggregateValues(df)
 
-
+#done
 if 'Stats' in respuesta['Analysis']:
     print(getStats(df))
 
-
+#done
 if 'Covariance' in respuesta['Analysis']:
     aggregatedDataframe = aggregateValues(df)
     while True:
@@ -901,18 +852,18 @@ if 'Covariance' in respuesta['Analysis']:
             Image.open(visualizeCovariance(df, norm = False)).show()
             break
 
-
+#done
 if 'Correlation' in respuesta['Analysis']:
     # normalization doesn't matter (produces the same output)
     img = Image.open(visualizeCorrelation(df))
     img.show()
 
-
+#done
 if 'Variance' in respuesta['Analysis']:
     img = Image.open(visualizeVariance(dataframe, names[answers['Layers'][0]]))
     img.show()
 
-
+#done
 if 'Histogram' in respuesta['Analysis']:
     try:
         bins = int(input("How many bins for histogram (minimum 10)?"))
@@ -952,7 +903,7 @@ if 'Log/Correlation Graph' in respuesta['Analysis']:
             exit(0)
 
 # clustering
-# TODO - crashes if 2 files are choosen
+# TODO NEEDS TO TAKE IN SOME OTHER STUFF, LIKE COLUMN NAMES, NEED TO BE ABLE TO READ IN FUTURE DATAFRAMES
 if 'Clustering' in respuesta['Analysis']:
     # ask for number of clusters
     while True:
