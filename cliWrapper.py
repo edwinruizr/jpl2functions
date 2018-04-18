@@ -36,6 +36,13 @@ names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
 
 
 ## FUNCTIONS
+
+# subsamples dataframe by percent, ie subsamplePercent = 5 means 5% of values in dataframe
+def dataframeSubsampler(df,subsamplePercent):
+    subsampleVal = 100/subsamplePercent
+    df_out = df[0::int(subsampleVal)]
+    return df_out
+
 def dataframe_label_assign(df, elements, labels):
     return_frame = df[elements]
     return_frame['label'] = labels
@@ -71,25 +78,49 @@ def kmean_plot_2_val(df, xy_array, kmean_labels, cluster_size):
 
 
 # TODO - figure how to implement this with the choices
-def plot_hours_all(df, x, y, array_of_cols, colors):
-    fileName = ''.join(array_of_cols)+''.join(colors)+x+y+'.png'
-    if os.path.isfile(fileName):
-        return fileName
+def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
+    #for jupyter use
+    #plotly.offline.init_notebook_mode()
 
-    completeDataframe.head()
-    fig = plt.figure(figsize = (20,15))
-    ax = fig.add_subplot(111, projection='3d')
+    data = []
+    
     for counter, i in enumerate(array_of_cols):
-        p = ax.scatter(df[x], df[y], df[i], alpha = 0.25, c = colors[counter], label=i)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    ax.set_zlabel('Temp')
-    plt.legend()
-    plt.title(x + ' vs ' + y)
-    print(array_of_cols)
-    plt.show()
-    plt.savefig(fileName, bbox_inches='tight')
-    return fileName
+    
+        trace = dict(
+            name = i,
+            x = df[xcol], y = df[ycol], z = df[i],
+            type = "scatter3d",    
+            mode = 'markers',
+            marker = dict( opacity=0.9, size=4, color=color_array[counter], line=dict(width=0) )
+        )
+        data.append( trace )
+
+    layout = dict(
+        title = 'Plot of all Temperatures',
+        legend=dict(
+        x=0.75,
+        y=1,
+        traceorder='normal',
+        font=dict(
+            family='sans-serif',
+            size=15,
+            color='#000'
+        ),
+        bgcolor='#E2E2E2',
+        bordercolor='#FFFFFF',
+        borderwidth=2
+        ),
+        scene = dict(
+        xaxis = dict( title=xcol, zeroline=False ),
+        yaxis = dict( title=ycol, zeroline=False ),
+        zaxis = dict( title='Z value', zeroline=False ),
+        ),
+    )
+
+    fig = dict(data=data, layout=layout)
+
+    # plots and opens html page
+    plotly.offline.plot(fig, filename='3d-temp-plot.html')
 
 def make3dPlot(df,xcol,ycol,zcol,color,alpha):
     #for jupyter use
@@ -1152,7 +1183,7 @@ while True:
         for col in temp_cols:
             completeDataframe[col] = completeDataframe[col].interpolate(method='linear')
         
-        fileName = plot_hours_all(completeDataframe, 'Longitude', 'Latitude', completeDataframe.columns[2:26], color_array)
+        fileName = plotAllTemp(dataframeSubsampler(completeDataframe,5), 'Longitude', 'Latitude', completeDataframe.columns[2:26], color_array)
         Image.open(fileName).show()
         break
     elif visualizeTemp == 'n':
