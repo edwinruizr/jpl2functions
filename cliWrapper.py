@@ -278,9 +278,9 @@ def make3dClusterPlot(df,colors_array):
         borderwidth=2
         ),
         scene = dict(
-        xaxis = dict( title=list(df_out)[0], zeroline=False ),
-        yaxis = dict( title=list(df_out)[1], zeroline=False ),
-        zaxis = dict( title=list(df_out)[2], zeroline=False ),
+        xaxis = dict( title=list(df)[0], zeroline=False ),
+        yaxis = dict( title=list(df)[1], zeroline=False ),
+        zaxis = dict( title=list(df)[2], zeroline=False ),
         ),
     )
 
