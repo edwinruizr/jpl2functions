@@ -609,9 +609,167 @@ def visualizeCovariance(listOfDataframes, norm = False):
     plt.show()
     return fileName
 
-def logAndCorrelation(element1, element2, element3, row, column):
+#VISUALIZATION
+###ONE LAYER VISUAL###
+def logAndCorrelation1(element1, rows, column, bins):
+    element1Value = ""
+
+    for key in element1.keys():
+        if key != 'Lat' and key!='Long':
+            element1Value = key
+    fileName = element1Value + str(row*column) +'SubsectionsLogAndCorrelationPlot.png'
+    if os.path.isfile(fileName):
+        return fileName
+
+    xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
+    yRange_e1 = element1['Long'].max() - element1['Long'].min()
+    section_e1 = math.ceil(xRange_e1/row)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/column)
+    min_e1 = element1['Lat'].min()
+    max_e1 = element1['Lat'].max()
+    ymin_e1 = element1['Long'].min()
+    ymax_e1 = element1['Long'].max()
+
+    e1_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
+    e1_log_arr = []
+    for key, value in e1_d.items():
+        e1_key_std = numpy.std(e1_d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+    #Histogram
+    plt.figure(1)
+    plt.subplot(2,2,1)
+    plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
+    plt.xlabel(r'$log(\sigma_1)$')
+    plt.ylabel(r'Frequency')
+    plt.hist(e1_log_arr, bins)
+    #Variance
+    e1_Var = numpy.var(e1_d[key][element1Value])
+    plt.subplot(2,2,2)
+    plt.title(r'$Frequency\ vs\ Effective\ Variance$')
+    plt.xlabel(r'$Effective Variance$')
+    plt.ylabel(r'Frequency')
+    plt.hist(e1_Var, bins)
+    plt.show()
+    return fileName
+###END OF ONE LAYER###
+###TWO LAYER VISUAL###
+def logAndCorrelation2(element1, element2, row, column, bins):
+    element1Value = ""
+    element2Value = ""
+
+    for key in element1.keys():
+        if key != 'Lat' and key!='Long':
+            element1Value = key
+    for key in element2.keys():
+        if key != 'Lat' and key!='Long':
+            element2Value = key
+
+    fileName = element1Value + element2Value + str(row*column) +'SubsectionsLogAndCorrelationPlot.png'
+    if os.path.isfile(fileName):
+        return fileName
+
+    xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
+    yRange_e1 = element1['Long'].max() - element1['Long'].min()
+    xRange_e2 = element2['Lat'].max() - element2['Lat'].min()
+    yRange_e2 = element2['Long'].max() - element2['Long'].min()
+
+    section_e1 = math.ceil(xRange_e1/row)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/column)
+    section_e2 = math.ceil(xRange_e2/row)
+    ySection_e2 = math.ceil(yRange_e2/column)
+
+    min_e1 = element1['Lat'].min()
+    max_e1 = element1['Lat'].max()
+    min_e2 = element2['Lat'].min()
+    max_e2 = element2['Lat'].max()
+    ymin_e1 = element1['Long'].min()
+    ymax_e1 = element1['Long'].max()
+    ymin_e2 = element2['Long'].min()
+    ymax_e2 = element2['Long'].max()
+
+    e1_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
+    e1_log_arr = []
+    for key, value in e1_d.items():
+        e1_key_std = numpy.std(e1_d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+    e2_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e2_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['Lat']) & (element2['Lat'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['Long']) & (element2['Long'] < ymin_e2+(y+1)*ySection_e2)]
+
+    e2_log_arr = []
+    for key, value in e2_d.items():
+        e2_key_std = numpy.std(e2_d[key][element2Value])
+        e2_key_log = numpy.log(e2_key_std)
+        e2_log_arr.append(e2_key_log)
+
+    # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
+    plt.subplot(2,2,1)
+    plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
+    plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
+    plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
+    plt.scatter(e2_log_arr, e1_log_arr)
+
+    ##### Correlation part #####
+    el1 = element1.corr()
+    el2 = element2.corr()
+
+    first_el = el1[element1Value]
+    second_el = el2[element2Value]
+
+    # p12 correlation
+    correlation = numpy.corrcoef(el1, el2)
+
+    # This loops through the correlation matrix and puts all the points into a single array. (Correlation matrix is 6x6 and corr_d will have a size of 36)
+    corr_d=[]
+    for x in range(0, len(correlation)):
+        for y in range(0, len(correlation)):
+            corr_d.append(correlation[x][y])
+
+    # This will change the size of e1_log_arr to have the same size as correlation (in order to plot on graph)
+    d={}
+    for x in range(0,6):
+        for y in range(0,6):
+            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+
+    # Will contain the log(standard deviation) of each value (Using this for correlation scatterplot)
+    e1_log_arr = []
+    for key, value in d.items():
+        e1_key_std = numpy.std(d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+    # Graph to show element1 vs p12
+    plt.subplot(2,2,2)
+    plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
+    plt.scatter(corr_d, e1_log_arr)
+
+    #Histograms
+    plt.subplot(2,2,4)
+    plt.title(r'$Frequency\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'Frequency')
+    plt.hist(corr_d, bins)
+    plt.show()
+    return fileName
+###END OF TWO LAYER###
 
 
+###THREE LAYER VISUAL###
+def logAndCorrelation3(element1, element2, element3, row, column, bins):
     element1Value = ""
     element2Value = ""
     element3Value = ""
@@ -619,11 +777,9 @@ def logAndCorrelation(element1, element2, element3, row, column):
     for key in element1.keys():
         if key != 'Lat' and key!='Long':
             element1Value = key
-
     for key in element2.keys():
         if key != 'Lat' and key!='Long':
             element2Value = key
-
     for key in element3.keys():
         if key!= 'Lat' and key!='Long':
             element3Value = key
@@ -632,16 +788,12 @@ def logAndCorrelation(element1, element2, element3, row, column):
     if os.path.isfile(fileName):
         return fileName
 
-
     xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
     yRange_e1 = element1['Long'].max() - element1['Long'].min()
-
     section_e1 = math.ceil(xRange_e1/row)         # length specified by user
     ySection_e1 = math.ceil(yRange_e1/column)
-
     min_e1 = element1['Lat'].min()
     max_e1 = element1['Lat'].max()
-
     ymin_e1 = element1['Long'].min()
     ymax_e1 = element1['Long'].max()
 
@@ -707,7 +859,7 @@ def logAndCorrelation(element1, element2, element3, row, column):
 
 
     # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
-    plt.subplot(2,2,1)
+    plt.subplot(4,3,2)
     plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
     plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
     plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
@@ -737,7 +889,6 @@ def logAndCorrelation(element1, element2, element3, row, column):
         for y in range(0,6):
             d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
 
-
     # Will contain the log(standard deviation) of each value (Using this for correlation scatterplot)
     e1_log_arr = []
     for key, value in d.items():
@@ -747,7 +898,7 @@ def logAndCorrelation(element1, element2, element3, row, column):
 
     # Graph to show element1 vs p12
 
-    plt.subplot(2,2,2)
+    plt.subplot(4,3,5)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
@@ -757,37 +908,52 @@ def logAndCorrelation(element1, element2, element3, row, column):
 
     # p23 correlation
     correlation2 = numpy.corrcoef(el2, el3)
-
     corr_d2=[]
     for x in range(0, len(correlation2)):
         for y in range(0, len(correlation2)):
             corr_d2.append(correlation2[x][y])
+    #p13 correlation
+    correlation3 = numpy.corrcoef(el1, el3)
+    corr_d3=[]
+    for x in range(0, len(correlation2)):
+        for y in range(0, len(correlation3)):
+            corr_d3.append(correlation2[x][y])
 
     #Graph to show element1 vs p23
-
-    plt.subplot(2,2,3)
+    plt.subplot(4,3,8)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
     plt.scatter(corr_d2, e1_log_arr)
 
-
     #Graph to show p12 vs p23
-
-    plt.subplot(2,2,4)
+    plt.subplot(4,3,11)
     plt.title(r'$\rho_{12}\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'$\rho_{12}$')
     plt.scatter(corr_d2, corr_d)
-    plt.tight_layout()
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
+
+    plt.subplot(4,3,1)
+    plt.title(r'$Frequency\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'Frequency')
+    plt.hist(corr_d, bins)
+    plt.subplot(4,3,4)
+    plt.title(r'$Frequency\ vs\ \rho_{23}$')
+    plt.xlabel(r'$\rho_{23}$')
+    plt.ylabel(r'Frequency')
+    plt.hist(corr_d2, bins)
+
+    fig = plt.figure(2)
+    ax = Axes3D(fig)
+    ax.scatter(corr_d, corr_d2, corr_d3)
+    ax.set_xlabel(r'$\rho_{12}$')
+    ax.set_ylabel(r'$\rho_{23}$')
+    ax.set_zlabel(r'$\rho_{13}$')
     plt.show()
     return fileName
-
+###END OF THREE LAYER###
 ## END OF FUNCTIONS
-
-
-
 
 
 
@@ -812,17 +978,17 @@ for answer in answers['Layers']:
 
 
 if len(df) == 2:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Scatter Plot', 'Plot x vs y']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Scatter Plot', 'Plot x vs y', 'Visualization Graphs(2)']
 # chose multiple layers442
 elif len(df) > 1:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Log/Correlation Graph']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Visualization Graphs(3)']
 # didn't choose any
 elif len(df) == 0:
     print("You didn't choose any layers. Exiting.")
     exit(0)
 # they chose 1 layer
 else:
-    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot', 'Clustering']
+    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot', 'Clustering', 'Visualization Graphs(1)']
 
 
 analysis = [
@@ -884,11 +1050,13 @@ if 'Scatter Plot' in respuesta['Analysis']:
     fileName = plot(dataframe.sample(n=2000),names[answers['Layers'][0]],names[answers['Layers'][1]])
     Image.open(fileName).show()
 
-if 'Log/Correlation Graph' in respuesta['Analysis']:
+###ONE LAYER VISUAL###
+if 'Visualization Graphs(1)' in respuesta['Analysis']:
     # To show up the first time
     row = int(input("How many rows for matrix? "))
     column = int(input("How many columns for matrix? "))
-    logAndCorrelation(df[0], df[1], df[2], row, column)
+    bins = int(input("How many bins? "))
+    logAndCorrelation1(df[0], row, column, bins)
 
     # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
     # Also to allow user to exit if they want to stop looking at graphs
@@ -897,10 +1065,56 @@ if 'Log/Correlation Graph' in respuesta['Analysis']:
         if userChoice == 'y':
             row = int(input("How many rows for matrix? "))
             column = int(input("How many columns for matrix? "))
-            fileName = logAndCorrelation(df[0], df[1], df[2], row, column)
+            bins = int(input("How many bins? "))
+            fileName = logAndCorrelation1(df[0], row, column, bins)
             Image.open(fileName).show()
         elif userChoice == 'n':
             exit(0)
+###END OF ONE LAYER VISUAL###
+
+###TWO LAYERS VISUAL###
+if 'Visualization Graphs(2)' in respuesta['Analysis']:
+    # To show up the first time
+    row = int(input("How many rows for matrix? "))
+    column = int(input("How many columns for matrix? "))
+    bins = int(input("How many bins? "))
+    logAndCorrelation2(df[0], df[1], row, column, bins)
+
+    # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
+    # Also to allow user to exit if they want to stop looking at graphs
+    while True:
+        userChoice = input("\nWould you like to continue to view graphs? (y/n)")
+        if userChoice == 'y':
+            row = int(input("How many rows for matrix? "))
+            column = int(input("How many columns for matrix? "))
+            bins = int(input("How many bins? "))
+            fileName = logAndCorrelation2(df[0], df[1], row, column, bins)
+            Image.open(fileName).show()
+        elif userChoice == 'n':
+            exit(0)
+##END OF TWO LAYER VISUAL##
+
+###THREE LAYER VISUAL###
+if 'Visualization Graphs(3)' in respuesta['Analysis']:
+    # To show up the first time
+    row = int(input("How many rows for matrix? "))
+    column = int(input("How many columns for matrix? "))
+    bins = int(input("How many bins? "))
+    logAndCorrelation3(df[0], df[1], df[2], row, column, bins)
+
+    # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
+    # Also to allow user to exit if they want to stop looking at graphs
+    while True:
+        userChoice = input("\nWould you like to continue to view graphs? (y/n)")
+        if userChoice == 'y':
+            row = int(input("How many rows for matrix? "))
+            column = int(input("How many columns for matrix? "))
+            bins = int(input("How many bins? "))
+            fileName = logAndCorrelation3(df[0], df[1], df[2], row, column, bins)
+            Image.open(fileName).show()
+        elif userChoice == 'n':
+            exit(0)
+###END OF THREE LAYER VISUAL###
 
 # clustering
 # TODO NEEDS TO TAKE IN SOME OTHER STUFF, LIKE COLUMN NAMES, NEED TO BE ABLE TO READ IN FUTURE DATAFRAMES
