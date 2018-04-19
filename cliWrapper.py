@@ -1,103 +1,12 @@
 import inquirer
-import math
-import os.path
-import pandas
-import numpy
-import gdal
-import georasters as gr
-from matplotlib import cm
-import matplotlib.pyplot as plt
-import matplotlib.mlab as mlab
-import seaborn as sns
-sns.set(color_codes=True)
-from sklearn import preprocessing
-from numpy import linalg as LA
-from mpl_toolkits.mplot3d import Axes3D
-from sklearn.cluster import KMeans
-import plotly
-import plotly.graph_objs as go
-from PIL import Image
-
-
-
-color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
-               '#551B8C', '#B5651E', '#614051', '#669999', '#3B7A57',
-              '#007FFF', '#8A0303', '#44D7A8', '#F0E130', '#007BA7',
-              '#BFFF00', '#BFAFB2', '#FC8EAC', '#353839', '#FF77FF', '#C9FFE5',
-              '#1CA9C9', '#DA8A67' ]
-
-# dictionary holding filename and according element name
-names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
-    'LP_GRS_Fe_Global_2ppd.tif': 'Iron',
-    'LP_GRS_H_Global_2ppd.tif' : 'Hydrogen',
-    'resizedLOLA.xyz' : 'LOLA value',
-    'temp_avg_hour00.xyz' : 'Temp Hour 00',
-    'temp_avg_hour01.xyz' : 'Temp Hour 01',
-    'temp_avg_hour02.xyz' : 'Temp Hour 02',
-    'temp_avg_hour03.xyz' : 'Temp Hour 03',
-    'temp_avg_hour04.xyz' : 'Temp Hour 04',
-    'temp_avg_hour05.xyz' : 'Temp Hour 05',
-    'temp_avg_hour06.xyz' : 'Temp Hour 06',
-    'temp_avg_hour07.xyz' : 'Temp Hour 07',
-    'temp_avg_hour08.xyz' : 'Temp Hour 08',
-    'temp_avg_hour09.xyz' : 'Temp Hour 09',
-    'temp_avg_hour10.xyz' : 'Temp Hour 10',
-    'temp_avg_hour11.xyz' : 'Temp Hour 11',
-    'temp_avg_hour12.xyz' : 'Temp Hour 12',
-    'temp_avg_hour13.xyz' : 'Temp Hour 13',
-    'temp_avg_hour14.xyz' : 'Temp Hour 14',
-    'temp_avg_hour15.xyz' : 'Temp Hour 15',
-    'temp_avg_hour16.xyz' : 'Temp Hour 16',
-    'temp_avg_hour17.xyz' : 'Temp Hour 17',
-    'temp_avg_hour18.xyz' : 'Temp Hour 18',
-    'temp_avg_hour19.xyz' : 'Temp Hour 19',
-    'temp_avg_hour20.xyz' : 'Temp Hour 20',
-    'temp_avg_hour21.xyz' : 'Temp Hour 21',
-    'temp_avg_hour22.xyz' : 'Temp Hour 22',
-    'temp_avg_hour23.xyz' : 'Temp Hour 23'
-    }
-
+from functionsLib import *
 
 ## FUNCTIONS
-
 # subsamples dataframe by percent, ie subsamplePercent = 5 means 5% of values in dataframe
 def dataframeSubsampler(df,subsamplePercent):
     subsampleVal = 100/subsamplePercent
     df_out = df[0::int(subsampleVal)]
     return df_out
-
-def dataframe_label_assign(df, elements, labels):
-    return_frame = df[elements]
-    return_frame['label'] = labels
-    return return_frame
-
-def normalize_choice(df, elements, norm_array):
-    return_frame = pandas.DataFrame()
-    for counter, i in enumerate(elements):
-        if(norm_array[counter] == True):
-            return_frame[i] = normalize_df(series_convertor(df[i]))
-        else:
-            return_frame[i] = df[i]
-    return return_frame
-
-def kmean(df, array_of_elements, array_of_normalization, cluster_size):
-    kmeans = KMeans(n_clusters= cluster_size, random_state=1)
-    filtered_df = normalize_choice(df[array_of_elements], array_of_elements, array_of_normalization)
-    kmeans.fit(filtered_df)
-    centers = kmeans.cluster_centers_
-    return kmeans.labels_
-
-def kmean_plot_2_val(df, xy_array, kmean_labels, cluster_size):
-    fig = plt.figure(figsize=(24,15))
-#         plt.scatter(df[x], df[y], color=c, marker='.', alpha=0.25, label=c)
-    x = xy_array[0]
-    y = xy_array[1]
-    for l, c in zip(range(cluster_size), color_array):
-        current_members = (kmean_labels == l)
-        plt.scatter(df.iloc[current_members][x], df.iloc[current_members][y], color=c, marker='.', alpha=0.25, label=c)
-    plt.xlabel(x)
-    plt.ylabel(y)
-    plt.show()
 
 
 # TODO - figure how to implement this with the choices
@@ -145,469 +54,6 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
     # plots and opens html page
     plotly.offline.plot(fig, filename='3d-temp-plot.html')
 
-def make3dPlot(df,xcol,ycol,zcol,color,alpha):
-    #for jupyter use
-    #plotly.offline.init_notebook_mode()
-
-    data = []
-
-    trace = dict(
-        name = 'point',
-        x = df[xcol], y = df[ycol], z = df[zcol],
-        type = "scatter3d",
-        mode = 'markers',
-        marker = dict( opacity=alpha, size=4, color=color, line=dict(width=0) )
-    )
-    data.append( trace )
-
-    layout = dict(
-        title = 'Plot of ' + xcol + '(x) ' + ycol + '(y) ' + zcol + '(z)',
-        legend=dict(
-        x=0.75,
-        y=1,
-        traceorder='normal',
-        font=dict(
-            family='sans-serif',
-            size=15,
-            color='#000'
-        ),
-        bgcolor='#E2E2E2',
-        bordercolor='#FFFFFF',
-        borderwidth=2
-        ),
-        scene = dict(
-        xaxis = dict( title=xcol, zeroline=False ),
-        yaxis = dict( title=ycol, zeroline=False ),
-        zaxis = dict( title=zcol, zeroline=False ),
-        ),
-    )
-
-    fig = dict(data=data, layout=layout)
-
-    # plots and opens html page
-    plotly.offline.plot(fig, filename='3d-scatter-plot.html')
-
-def make3dClusterPlot(df,colors_array):
-    #for jupyter use
-    # plotly.offline.init_notebook_mode()
-
-    data = []
-
-    for i in range(len(df['label'].unique())):
-        name = df['label'].unique()[i]
-        color = colors_array[i]
-        x = df[ df['label'] == name ][list(df)[0]]
-        y = df[ df['label'] == name ][list(df)[1]]
-        z = df[ df['label'] == name ][list(df)[2]]
-
-        trace = dict(
-            name = name,
-            x = x, y = y, z = z,
-            type = "scatter3d",
-            mode = 'markers',
-            marker = dict( size=4, color=color, line=dict(width=0) )
-        )
-        data.append( trace )
-
-        #cluster = dict(
-        #    color = color,
-        #    opacity = 0.0,
-        #    type = "mesh3d",
-        #    x = x, y = y, z = z )
-        #data.append( cluster )
-
-    layout = dict(
-        title = 'Cluster Plot of ' + list(df)[0] + '(x) ' + list(df)[1] + '(y) ' + list(df)[2] + '(z)',
-        legend=dict(
-        x=0.75,
-        y=1,
-        traceorder='normal',
-        font=dict(
-            family='sans-serif',
-            size=15,
-            color='#000'
-        ),
-        bgcolor='#E2E2E2',
-        bordercolor='#FFFFFF',
-        borderwidth=2
-        ),
-        scene = dict(
-        xaxis = dict( title=list(df)[0], zeroline=False ),
-        yaxis = dict( title=list(df)[1], zeroline=False ),
-        zaxis = dict( title=list(df)[2], zeroline=False ),
-        ),
-    )
-
-    fig = dict(data=data, layout=layout)
-
-    # plots and opens html page
-    plotly.offline.plot(fig, filename='3d-scatter-cluster.html')
-
-# clustering FUNCTIONS
-def kmeans_decision_algo(df, cluster, normalized):
-    if(normalized == True):
-        kmean_algo_visualizer(normalize_df(df), cluster)
-    else:
-        kmean_algo_visualizer(df, cluster)
-
-colors = ['red', 'blue', 'green', 'purple', 'cyan']
-
-# should be called with a df of 3 columns
-def kmean_algo_visualizer(df, cluster_size):
-    # TODO - doesn't consider normalization (add extra bool value to function?)
-    fileName = ''.join(list(df))+str(cluster_size)+'kmean.png'
-    if os.path.isfile(fileName):
-        return fileName
-    kmeans = KMeans(n_clusters = cluster_size)
-    kmeans.fit(df)
-    centers = kmeans.cluster_centers_
-    labels = kmeans.labels_
-    fig = plt.figure(figsize=(10,7))
-    ax = fig.gca(projection='3d')
-
-
-    for l, c in zip(range(cluster_size), colors):
-        current_members = (labels == l)
-        current_center = centers[1]
-        ax.scatter(df.iloc[current_members,0], df.iloc[current_members,1], df.iloc[current_members, 2], color=c, marker='.', alpha=0.025)
-
-    ax.scatter(centers[:,0], centers[:,1], centers[:,2], marker='X', c='black', alpha=1)
-    ax.set_xlabel(df.columns[0])
-    ax.set_ylabel(df.columns[1])
-    ax.set_zlabel(df.columns[2])
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-
-
-def col_number_getter(df, target):
-    for i in range(len(df.columns)):
-        if(df.columns[i] == target):
-            return i
-
-def cluster_visualizer(df, col_one, col_two, col_three, cluster_size):
-    # TODO - again should file name have normalization?
-    fileName = ''.join(list(df)) + col_one + col_two + col_three + str(cluster_size) +'Cluster.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    kmeans = KMeans(n_clusters = cluster_size)
-    kmeans.fit(df)
-    centers = kmeans.cluster_centers_
-    labels = kmeans.labels_
-    fig = plt.figure(figsize=(10,7))
-    ax = fig.gca(projection='3d')
-    col_one_number = col_number_getter(df, col_one)
-    col_two_number = col_number_getter(df, col_two)
-    col_three_number = col_number_getter(df, col_three)
-
-    for l, c in zip(range(cluster_size), colors):
-        current_members = (labels == l)
-        current_center = centers[1]
-        ax.scatter(df.iloc[current_members][col_one], df.iloc[current_members][col_two], df.iloc[current_members][col_three], color=c, marker='.', alpha=0.025)
-    ax.scatter(centers[:,col_one_number], centers[:,col_two_number], centers[:,col_three_number], marker='X', c='black', alpha=1)
-    ax.set_xlabel(col_one)
-    ax.set_ylabel(col_two)
-    ax.set_zlabel(col_three)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-# end of clustering FUNCTIONS
-
-#check
-def series_convertor(x):
-    if isinstance(x, pandas.Series):
-        return x.to_frame()
-
-#check
-def normalize_df(df):
-    MMS = preprocessing.MinMaxScaler()
-    normalized = MMS.fit_transform(df)
-    normalized = pandas.DataFrame(normalized)
-    normalized.columns = df.columns
-    return normalized
-
-def norm(df):
-    normal = preprocessing.Normalizer()
-    n = normal.fit_transform(df)
-    n = pandas.DataFrame(n)
-    n.columns = df.columns
-    return n
-
-#check
-def plot_x_y_normalize_all(df, x, y, normalizer, opacity):
-    if normalizer == True:
-        normed = "Normalized"
-    else:
-        normed = ""
-
-    fileName = ''.join(list(df)) + x + y + normed + str(opacity) +'scatterplot.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    if(normalizer == True):
-        df = normalize_df(df)
-    plt.scatter(df[x], df[y], c=color_array[0], alpha = opacity)
-    plt.xlabel(x)
-    plt.ylabel(y)
-    plt.title(x + ' vs ' + y)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-#check
-def plot_x_y_normalize_individual(df, x, normalize_x, y, normalize_y, opacity):
-    if normalize_x == True:
-        normedX = "Normalized"
-    else:
-        normedX = ""
-
-    if normalize_y == True:
-        normedY = "Normalized"
-    else:
-        normedY = ""
-
-    fileName = ''.join(list(df)) + x + normedX + y + normedY + str(opacity) +'scatterplot.png'
-    if os.path.isfile(fileName):
-        return fileName
-    if(normalize_x == True):
-        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
-        x = 'Normalized ' + x
-    if(normalize_y == True):
-        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
-        y = 'Normalized ' + y
-    plt.scatter(df[x], df[y], c = color_array[0], alpha = opacity)
-    plt.xlabel(x)
-    plt.ylabel(y)
-    plt.title(x + ' vs ' + y)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-#check
-def plot_3_val_normalize_all(df, col_one, col_two, col_three, normalizer, opacity):
-    if normalizer == True:
-        normed = "AllNormalized"
-    else:
-        normed = ""
-    fileName = ''.join(list(df)) + col_one + col_two + col_three + normed + str(opacity) +'Heatmap.png'
-    if os.path.isfile(fileName):
-        return fileName
-    if(normalizer == True):
-        df = normalize_df(df)
-    plt.scatter(df[col_one], df[col_two], c=df[col_three], alpha=opacity)
-    plt.xlabel(col_one)
-    plt.ylabel(col_two)
-    plt.colorbar(label = col_three)
-    plt.title(col_one + ' vs ' + col_two)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-#check
-def plot_3_val_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, opacity):
-    if x_norm == True:
-        normedx = "Normalized"
-    else:
-        normedx = ""
-
-    if y_norm == True:
-        normedy = "Normalized"
-    else:
-        normedy = ""
-
-    if z_norm == True:
-        normedz = "Normalized"
-    else:
-        normedz = ""
-
-    fileName = ''.join(list(df)) + normedx + x + normedy + y_norm + z_norm + z + str(opacity) +'Heatmap.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    if(x_norm == True):
-        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
-        x = 'Normalized ' + x
-    if(y_norm == True):
-        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
-        y = 'Normalized ' + y
-    if(z_norm == True):
-        df['Normalized ' + z] = normalize_df(series_convertor(df[z])).values
-        z = 'Normalized ' + z
-    plt.scatter(df[x], df[y], c = df[z], alpha = opacity)
-    plt.xlabel(x)
-    plt.ylabel(y)
-    plt.colorbar(label = z)
-    plt.title(x + ' vs ' + y)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-#check
-def plot_three_val_3d(df, x, y, z, color, alpha):
-    fileName = ''.join(list(df)) + x + y + z + color + str(alpha) +'3Dscatterplot.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    fig = plt.figure(figsize = (10,7))
-    ax = fig.add_subplot(111, projection='3d')
-    p = ax.scatter(df[x], df[y], df[z], alpha = alpha, marker = '.', c = color)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    ax.set_zlabel(z)
-    if(type(color) != str):
-        fig.colorbar(p)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-
-def plotHistogram(df, binNumbers):
-    fileName = df.columns.values.tolist()[-1] + 'HistogramWith' + str(binNumbers) + 'Bins.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    fig = plt.figure(figsize=(10,7))
-    plt.xlabel('Value', fontsize= 20)
-    plt.ylabel('Frequency', fontsize= 20)
-    plt.title(df.columns.values.tolist()[-1], fontsize= 30)
-    ax = fig.add_subplot(111)
-    df = df.iloc[:,2].copy()
-    ax = df.hist(figsize=(10,7), bins= binNumbers)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-
-def visualizeVariance(dataframe, elementName):
-    fileName = ''.join(list(dataframe)) + elementName +'Variance.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    variance = dataframe.var()
-    mu = dataframe.mean().mean()
-    sigma = math.sqrt(variance)
-    x = numpy.linspace(mu - 3*sigma, mu + 3*sigma, 100)
-    plt.title("Normal Distribution "+ elementName, fontsize= 30)
-    plt.plot(x,mlab.normpdf(x, mu, sigma))
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-def plot(df, xname, yname):
-    fileName = ''.join(list(df)) + xname + yname + 'EqualAspectScatterplot.png'
-    if os.path.isfile(fileName):
-        return fileName
-    ax = df.plot(kind='scatter', x=xname, y=yname)
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.suptitle('scatter plot', fontsize= 30)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-# input file (tif or xyz) -> output pandas dataframe
-def fileToDataframe(file):
-    if '.xyz' in file:
-        df = pandas.DataFrame(pandas.read_csv(file, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
-        df.columns =['x', 'y', names[file]]
-    else:
-        df = gr.from_file(file).to_pandas()
-        df = df[["x", "y", "value"]].copy()
-        df.columns = ["x", "y", names[file]]
-    return df
-
-
-def aggregateValues(listOfDataframes):
-    for index, df in enumerate(listOfDataframes):
-        if index == 0:
-            valuesDf = df.iloc[:,2].copy()
-            valuesDf = valuesDf.to_frame()
-        else:
-            valuesDf = pandas.concat([valuesDf, df.iloc[:,2].copy()], axis=1)
-    return valuesDf
-
-
-# input list of dataframes -> output dataframe of mean, std, min, 25%, 50%, 75%, and max
-def getStats(listofDataframes):
-    valuesDf = aggregateValues(listofDataframes)
-    return valuesDf.describe()
-
-
-
-# input list of dataframes -> output dataframe which is a correlation matrix of dataframes passed (if you just want text)
-def getCorrelation(listOfDataframes):
-    valuesDf = aggregateValues(listOfDataframes)
-    return valuesDf.corr()
-
-# if you want correlation visualization
-def visualizeCorrelation(listOfDataframes):
-    valuesDf = aggregateValues(listOfDataframes)
-
-    fileName = ''.join(list(valuesDf)) + 'CorrelationMatrix.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    correlations = valuesDf.corr()
-#    print(correlations)
-    fig = plt.figure(figsize=(10,7))
-    plt.title("Correlation Matrix", fontsize= 30)
-    ax = fig.add_subplot(111)
-    cax = ax.matshow(correlations, cmap=cm.gist_earth,alpha=0.7,vmin=correlations.min().min(), vmax=correlations.max().max())
-    for (i, j), z in numpy.ndenumerate(correlations):
-        ax.text(j, i, '{:0.4f}'.format(z), ha='center', va='center')
-    fig.colorbar(cax)
-    ticks = numpy.arange(0,len(listOfDataframes),1)
-    ax.set_xticks(ticks)
-    ax.set_yticks(ticks)
-    ax.set_xticklabels(correlations.columns)
-    ax.set_yticklabels(correlations.columns)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
-
-def getMin(df):
-    min = df.min().min()
-    return min
-
-
-def getMax(df):
-    max = df.max().max()
-    return max
-
-def visualizeCovariance(listOfDataframes, norm = False):
-    if norm == True:
-        normed = "Normalized"
-    else:
-        normed = ""
-
-    valuesDf = aggregateValues(listOfDataframes)
-    fileName = ''.join(list(valuesDf)) + normed +'CovarianceMatrix.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    if norm:
-        valuesDF = pandas.DataFrame(preprocessing.MinMaxScaler().fit_transform(valuesDf), columns=valuesDf.columns, index=valuesDf.index)
-
-    covariance = valuesDf.cov()
-    max = getMax(covariance)
-    min = getMin(covariance)
-    fig = plt.figure(figsize=(10,7))
-    plt.title("Covariance Matrix", fontsize= 30)
-    ax = fig.add_subplot(111)
-    cax = ax.matshow(covariance, cmap=cm.gist_earth, alpha=0.7, vmin=covariance.min().min(), vmax=covariance.max().max())
-    for (i, j), z in numpy.ndenumerate(covariance):
-        ax.text(j, i, '{:0.4f}'.format(z), ha='center', va='center')
-    fig.colorbar(cax)
-    ticks = numpy.arange(0,len(listOfDataframes),1)
-    ax.set_xticks(ticks)
-    ax.set_yticks(ticks)
-    ax.set_xticklabels(covariance.columns)
-    ax.set_yticklabels(covariance.columns)
-    plt.savefig(fileName, dpi=300, bbox_inches='tight')
-    plt.show()
-    return fileName
 
 #VISUALIZATION
 ###ONE LAYER VISUAL###
@@ -953,10 +399,9 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
     plt.show()
     return fileName
 ###END OF THREE LAYER###
+
+
 ## END OF FUNCTIONS
-
-
-
 
 questions = [
              inquirer.Checkbox('Layers',
@@ -969,16 +414,15 @@ answers = inquirer.prompt(questions)
 df = []
 # answers holds the layers to be analyzed
 for answer in answers['Layers']:
-    if answer in names:
-        tempDf = fileToDataframe(answer)
-        # TODO - call conversion function HERE
-        tempDf = tempDf.rename(columns={"x": "Lat", "y": "Long"})
-        df.append(tempDf)
+    tempDf = fileToDataframe(names[answer], answer)
+    # TODO - call conversion function HERE
+    tempDf = tempDf.rename(columns={"x": "Lat", "y": "Long"})
+    df.append(tempDf)
 #df now is a list of dataframes for the files selected
 
 
 if len(df) == 2:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Scatter Plot', 'Plot x vs y', 'Visualization Graphs(2)']
+    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Plot x vs y', 'Visualization Graphs(2)']
 # chose multiple layers442
 elif len(df) > 1:
     choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Visualization Graphs(3)']
@@ -998,13 +442,11 @@ analysis = [
                                ),
              ]
 respuesta = inquirer.prompt(analysis)
-
-
 dataframe = aggregateValues(df)
 
 #done
 if 'Stats' in respuesta['Analysis']:
-    print(getStats(df))
+    print(getStats(dataframe))
 
 #done
 if 'Covariance' in respuesta['Analysis']:
@@ -1012,21 +454,21 @@ if 'Covariance' in respuesta['Analysis']:
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
-            Image.open(visualizeCovariance(df, norm = True)).show()
+            Image.open(visualizeCovariance(dataframe, answers['Layers'], norm = True)).show()
             break
         elif visualizeInput == 'n':
-            Image.open(visualizeCovariance(df, norm = False)).show()
+            Image.open(visualizeCovariance(dataframe, answers['Layers'], norm = False)).show()
             break
 
 #done
 if 'Correlation' in respuesta['Analysis']:
     # normalization doesn't matter (produces the same output)
-    img = Image.open(visualizeCorrelation(df))
+    img = Image.open(visualizeCorrelation(dataframe, answers['Layers']))
     img.show()
 
 #done
 if 'Variance' in respuesta['Analysis']:
-    img = Image.open(visualizeVariance(dataframe, names[answers['Layers'][0]]))
+    img = Image.open(visualizeVariance(dataframe, answers['Layers'][0]))
     img.show()
 
 #done
@@ -1042,13 +484,11 @@ if 'Histogram' in respuesta['Analysis']:
         except ValueError:
             print("Enter a number")
             bins = 0
-    fileName = plotHistogram(df[0], bins)
+    fileName = plotHistogram(dataframe, bins)
     Image.open(fileName).show()
 
-if 'Scatter Plot' in respuesta['Analysis']:
-    # TODO - ask user for sample (integer)
-    fileName = plot(dataframe.sample(n=2000),names[answers['Layers'][0]],names[answers['Layers'][1]])
-    Image.open(fileName).show()
+
+
 
 ###ONE LAYER VISUAL###
 if 'Visualization Graphs(1)' in respuesta['Analysis']:
@@ -1134,7 +574,7 @@ if 'Clustering' in respuesta['Analysis']:
     for i in range(len(answers['Layers'])):
 
         while True:
-            visualizeInput = input("Do you want to normalize "+ names[answers['Layers'][i]] +" data? (y/n)")
+            visualizeInput = input("Do you want to normalize "+ answers['Layers'][i] +" data? (y/n)")
             if visualizeInput == 'y':
                 normalizeBoolList.append(True)
                 break
@@ -1142,27 +582,14 @@ if 'Clustering' in respuesta['Analysis']:
                 normalizeBoolList.append(False)
                 break
 
-    # print(normalizeBoolList)
 
-    # TODO - function parameters will be changed
-    # while True:
-    #     visualizeInput = input("Do you want to normalize the data? (y/n)")
-    #     if visualizeInput == 'y':
-    #         fileName = kmeans_decision_algo(dataframe, clusterSize, True)
-    #         Image.open(fileName).show()
-    #         break
-    #     elif visualizeInput == 'n':
-    #         fileName = kmeans_decision_algo(dataframe, clusterSize, False)
-    #         Image.open(fileName).show()
-    #         break
     wholeDf = df[0]
     for x in range(0, len(df)-1):
         wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on=['Lat', 'Long'])
 
     for answer in answers['Layers']:
-        wholeDf=wholeDf[wholeDf[names[answer]].notnull()]
+        wholeDf=wholeDf[wholeDf[answer].notnull()]
 
-    wholeDf.to_csv('WholeDf.csv')
     cAnswerLength = 0
     while cAnswerLength!=3 and cAnswerLength!=2:
         cluster = [
@@ -1176,7 +603,7 @@ if 'Clustering' in respuesta['Analysis']:
 
     elementsList = []
     for layer in answers['Layers']:
-        elementsList.append(names[layer])
+        elementsList.append(layer)
     labels = kmean(wholeDf, elementsList, normalizeBoolList, clusterSize)
     # run function with choices choosen
     if cAnswerLength == 2:
@@ -1184,46 +611,56 @@ if 'Clustering' in respuesta['Analysis']:
 
     if cAnswerLength == 3:
         make3dClusterPlot(dataframe_label_assign(wholeDf,cAnswer['Cluster'],labels),color_array)
-    # fileName =   cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
-    # Image.open(fileName).show()
 
-# TODO - is the same as the scatterplot section
+
 if 'Plot x vs y' in respuesta['Analysis']:
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
-            fileName = plot_x_y_normalize_all(dataframe, names[answers['Layers'][0]], names[answers['Layers'][1]], True, 0.5)
-            Image.open(fileName).show()
+            normalize = True
             break
         elif visualizeInput == 'n':
-            fileName = plot_x_y_normalize_all(dataframe, names[answers['Layers'][0]], names[answers['Layers'][1]], False, 0.5)
-            Image.open(fileName).show()
+            normalize = False
             break
 
-    # plot_x_y_normalize_individual(dataframe, names[answers['Layers'][0]], False, names[answers['Layers'][1]], False, 0.5)
+    while True:
+        visualizeInput = input("Do you want the axes to be of equal aspect? (y/n)")
+        if visualizeInput == 'y':
+            equalAspect = True
+            break
+        elif visualizeInput == 'n':
+            equalAspect = False
+            break
+
+    while True:
+        try:
+            sample = int(input("Enter number of random sample from data. (min: 200 - " + str(dataframe.shape[0]) + ")"))
+        except ValueError:
+            print("Enter a number!")
+            sample = 0
+        if 200 <= sample <= dataframe.shape[0]:
+            break
+
+    fileName = plot_x_y_normalize_all(dataframe.sample(n=sample), answers['Layers'][0], answers['Layers'][1], normalize, equalAspect, 0.5)
+    Image.open(fileName).show()
 
 
 if 'Plot layer' in respuesta['Analysis']:
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
-            fileName = plot_3_val_normalize_all(df[len(df)-1], 'Lat', 'Long', names[answers['Layers'][len(df)-1]], True, 1)
+            fileName = plot_3_val_normalize_all(df[0], 'Lat', 'Long', answers['Layers'][0], True, 1)
             Image.open(fileName).show()
             break
         elif visualizeInput == 'n':
-            fileName = plot_3_val_normalize_all(df[len(df)-1], 'Lat', 'Long', names[answers['Layers'][len(df)-1]], False, 1)
+            fileName = plot_3_val_normalize_all(df[0], 'Lat', 'Long', answers['Layers'][0], False, 1)
             Image.open(fileName).show()
             break
-    # plot_3_val_normalize_individual(df[len(df)-1], 'x', False, 'y', True, names[answers['Layers'][len(df)-1]], True, 1)
-
-
-
 
 
 if '3d plot' in respuesta['Analysis']:
-    fileName = make3dPlot(df[0], 'Lat', 'Long', names[answers['Layers'][0]], 'blue' , 0.2)
-    Image.open(fileName).show()
-    print(df[0].head())
+    make3dPlot(df[0], 'Lat', 'Long', answers['Layers'][0], 'blue' , 0.2)
+
 
 
 while True:
