@@ -106,7 +106,13 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
     #plotly.offline.init_notebook_mode()
 
     data = []
-
+    
+    #check if dataframe is too large for plotting
+    subsampleVal = 100
+    if((len(df)*len(array_of_cols)) > 500000):
+        subsampleVal = int((500000*100)/(len(df)*len(array_of_cols)))
+        df = dataframeSubsampler(df,subsampleVal)
+    
     for counter, i in enumerate(array_of_cols):
 
         trace = dict(
@@ -118,8 +124,22 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
         )
         data.append( trace )
 
-    layout = dict(
-        title = 'Plot of all Temperatures',
+     layout = dict(
+        title = 'Plot of all Temperatures(' + str(subsampleVal) + '% of data subsampled)',
+        annotations=[
+        dict(
+            x=0.79,
+            y=1.02,
+            align="right",
+            valign="top",
+            text='Temp Layer',
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            xanchor="middle",
+            yanchor="top"
+        )
+        ],
         legend=dict(
         x=0.75,
         y=1,
@@ -150,7 +170,13 @@ def make3dPlot(df,xcol,ycol,zcol,color,alpha):
     #plotly.offline.init_notebook_mode()
 
     data = []
-
+	
+    #check if dataframe is too large for plotting
+    subsampleVal = 100
+    if(len(df) > 500000):
+        subsampleVal = int((500000*100)/len(df))
+        df = dataframeSubsampler(df,subsampleVal)
+        
     trace = dict(
         name = 'point',
         x = df[xcol], y = df[ycol], z = df[zcol],
@@ -161,7 +187,7 @@ def make3dPlot(df,xcol,ycol,zcol,color,alpha):
     data.append( trace )
 
     layout = dict(
-        title = 'Plot of ' + xcol + '(x) ' + ycol + '(y) ' + zcol + '(z)',
+        title = 'Plot of ' + xcol + '(x) ' + ycol + '(y) ' + zcol + '(z)' + ' (' + str(subsampleVal) + '% of data subsampled)',
         legend=dict(
         x=0.75,
         y=1,
@@ -193,6 +219,12 @@ def make3dClusterPlot(df,colors_array):
 
     data = []
 
+    #check if dataframe is too large for plotting
+    subsampleVal = 100
+    if(len(df) > 500000):
+        subsampleVal = int((500000*100)/len(df))
+        df = dataframeSubsampler(df,subsampleVal)
+        
     for i in range(len(df['label'].unique())):
         name = df['label'].unique()[i]
         color = colors_array[i]
@@ -217,7 +249,21 @@ def make3dClusterPlot(df,colors_array):
         #data.append( cluster )
 
     layout = dict(
-        title = 'Cluster Plot of ' + list(df)[0] + '(x) ' + list(df)[1] + '(y) ' + list(df)[2] + '(z)',
+        title = 'Cluster Plot of ' + list(df_out)[0] + '(x) ' + list(df_out)[1] + '(y) ' + list(df_out)[2] + '(z) (' + str(subsampleVal) + '% of data subsampled)',
+        annotations=[
+        dict(
+            x=0.79,
+            y=1.02,
+            align="right",
+            valign="top",
+            text='Cluster Number',
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            xanchor="middle",
+            yanchor="top"
+        )
+        ],
         legend=dict(
         x=0.75,
         y=1,
@@ -232,9 +278,9 @@ def make3dClusterPlot(df,colors_array):
         borderwidth=2
         ),
         scene = dict(
-        xaxis = dict( title=list(df)[0], zeroline=False ),
-        yaxis = dict( title=list(df)[1], zeroline=False ),
-        zaxis = dict( title=list(df)[2], zeroline=False ),
+        xaxis = dict( title=list(df_out)[0], zeroline=False ),
+        yaxis = dict( title=list(df_out)[1], zeroline=False ),
+        zaxis = dict( title=list(df_out)[2], zeroline=False ),
         ),
     )
 
