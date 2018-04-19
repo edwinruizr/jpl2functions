@@ -15,7 +15,13 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
     #plotly.offline.init_notebook_mode()
 
     data = []
-
+    
+    #check if dataframe is too large for plotting
+    subsampleVal = 100
+    if((len(df)*len(array_of_cols)) > 500000):
+        subsampleVal = int((500000*100)/(len(df)*len(array_of_cols)))
+        df = dataframeSubsampler(df,subsampleVal)
+    
     for counter, i in enumerate(array_of_cols):
 
         trace = dict(
@@ -27,8 +33,22 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
         )
         data.append( trace )
 
-    layout = dict(
-        title = 'Plot of all Temperatures',
+     layout = dict(
+        title = 'Plot of all Temperatures(' + str(subsampleVal) + '% of data subsampled)',
+        annotations=[
+        dict(
+            x=0.79,
+            y=1.02,
+            align="right",
+            valign="top",
+            text='Temp Layer',
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            xanchor="middle",
+            yanchor="top"
+        )
+        ],
         legend=dict(
         x=0.75,
         y=1,
@@ -53,6 +73,7 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
 
     # plots and opens html page
     plotly.offline.plot(fig, filename='3d-temp-plot.html')
+
 
 
 #VISUALIZATION
