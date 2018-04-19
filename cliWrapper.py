@@ -20,7 +20,6 @@ from PIL import Image
 
 
 
-
 color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
                '#551B8C', '#B5651E', '#614051', '#669999', '#3B7A57',
               '#007FFF', '#8A0303', '#44D7A8', '#F0E130', '#007BA7',
@@ -31,12 +30,43 @@ color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
 names = {'LP_GRS_Th_Global_2ppd.tif': 'Thorium',
     'LP_GRS_Fe_Global_2ppd.tif': 'Iron',
     'LP_GRS_H_Global_2ppd.tif' : 'Hydrogen',
-    'resizedLOLA.xyz' : 'LOLA value'
+    'resizedLOLA.xyz' : 'LOLA value',
+    'temp_avg_hour00.xyz' : 'Temp Hour 00',
+    'temp_avg_hour01.xyz' : 'Temp Hour 01',
+    'temp_avg_hour02.xyz' : 'Temp Hour 02',
+    'temp_avg_hour03.xyz' : 'Temp Hour 03',
+    'temp_avg_hour04.xyz' : 'Temp Hour 04',
+    'temp_avg_hour05.xyz' : 'Temp Hour 05',
+    'temp_avg_hour06.xyz' : 'Temp Hour 06',
+    'temp_avg_hour07.xyz' : 'Temp Hour 07',
+    'temp_avg_hour08.xyz' : 'Temp Hour 08',
+    'temp_avg_hour09.xyz' : 'Temp Hour 09',
+    'temp_avg_hour10.xyz' : 'Temp Hour 10',
+    'temp_avg_hour11.xyz' : 'Temp Hour 11',
+    'temp_avg_hour12.xyz' : 'Temp Hour 12',
+    'temp_avg_hour13.xyz' : 'Temp Hour 13',
+    'temp_avg_hour14.xyz' : 'Temp Hour 14',
+    'temp_avg_hour15.xyz' : 'Temp Hour 15',
+    'temp_avg_hour16.xyz' : 'Temp Hour 16',
+    'temp_avg_hour17.xyz' : 'Temp Hour 17',
+    'temp_avg_hour18.xyz' : 'Temp Hour 18',
+    'temp_avg_hour19.xyz' : 'Temp Hour 19',
+    'temp_avg_hour20.xyz' : 'Temp Hour 20',
+    'temp_avg_hour21.xyz' : 'Temp Hour 21',
+    'temp_avg_hour22.xyz' : 'Temp Hour 22',
+    'temp_avg_hour23.xyz' : 'Temp Hour 23'
     }
 
 
 ## FUNCTIONS
-def chris_needs_a_dataframe(df, elements, labels):
+
+# subsamples dataframe by percent, ie subsamplePercent = 5 means 5% of values in dataframe
+def dataframeSubsampler(df,subsamplePercent):
+    subsampleVal = 100/subsamplePercent
+    df_out = df[0::int(subsampleVal)]
+    return df_out
+
+def dataframe_label_assign(df, elements, labels):
     return_frame = df[elements]
     return_frame['label'] = labels
     return return_frame
@@ -71,25 +101,91 @@ def kmean_plot_2_val(df, xy_array, kmean_labels, cluster_size):
 
 
 # TODO - figure how to implement this with the choices
-def plot_hours_all(df, x, y, array_of_cols, colors):
-    fileName = ''.join(array_of_cols)+''.join(colors)+x+y+'.png'
-    if os.path.isfile(fileName):
-        return fileName
+def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
+    #for jupyter use
+    #plotly.offline.init_notebook_mode()
 
-    completeDataframe.head()
-    fig = plt.figure(figsize = (20,15))
-    ax = fig.add_subplot(111, projection='3d')
+    data = []
+
     for counter, i in enumerate(array_of_cols):
-        p = ax.scatter(df[x], df[y], df[i], alpha = 0.25, c = colors[counter], label=i)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    ax.set_zlabel('Temp')
-    plt.legend()
-    plt.title(x + ' vs ' + y)
-    print(array_of_cols)
-    plt.show()
-    plt.savefig(fileName, bbox_inches='tight')
-    return fileName
+
+        trace = dict(
+            name = i,
+            x = df[xcol], y = df[ycol], z = df[i],
+            type = "scatter3d",
+            mode = 'markers',
+            marker = dict( opacity=0.9, size=4, color=color_array[counter], line=dict(width=0) )
+        )
+        data.append( trace )
+
+    layout = dict(
+        title = 'Plot of all Temperatures',
+        legend=dict(
+        x=0.75,
+        y=1,
+        traceorder='normal',
+        font=dict(
+            family='sans-serif',
+            size=15,
+            color='#000'
+        ),
+        bgcolor='#E2E2E2',
+        bordercolor='#FFFFFF',
+        borderwidth=2
+        ),
+        scene = dict(
+        xaxis = dict( title=xcol, zeroline=False ),
+        yaxis = dict( title=ycol, zeroline=False ),
+        zaxis = dict( title='Z value', zeroline=False ),
+        ),
+    )
+
+    fig = dict(data=data, layout=layout)
+
+    # plots and opens html page
+    plotly.offline.plot(fig, filename='3d-temp-plot.html')
+
+def make3dPlot(df,xcol,ycol,zcol,color,alpha):
+    #for jupyter use
+    #plotly.offline.init_notebook_mode()
+
+    data = []
+
+    trace = dict(
+        name = 'point',
+        x = df[xcol], y = df[ycol], z = df[zcol],
+        type = "scatter3d",
+        mode = 'markers',
+        marker = dict( opacity=alpha, size=4, color=color, line=dict(width=0) )
+    )
+    data.append( trace )
+
+    layout = dict(
+        title = 'Plot of ' + xcol + '(x) ' + ycol + '(y) ' + zcol + '(z)',
+        legend=dict(
+        x=0.75,
+        y=1,
+        traceorder='normal',
+        font=dict(
+            family='sans-serif',
+            size=15,
+            color='#000'
+        ),
+        bgcolor='#E2E2E2',
+        bordercolor='#FFFFFF',
+        borderwidth=2
+        ),
+        scene = dict(
+        xaxis = dict( title=xcol, zeroline=False ),
+        yaxis = dict( title=ycol, zeroline=False ),
+        zaxis = dict( title=zcol, zeroline=False ),
+        ),
+    )
+
+    fig = dict(data=data, layout=layout)
+
+    # plots and opens html page
+    plotly.offline.plot(fig, filename='3d-scatter-plot.html')
 
 def make3dClusterPlot(df,colors_array):
     #for jupyter use
@@ -121,7 +217,7 @@ def make3dClusterPlot(df,colors_array):
         #data.append( cluster )
 
     layout = dict(
-        title = '3d point clustering',
+        title = 'Cluster Plot of ' + list(df)[0] + '(x) ' + list(df)[1] + '(y) ' + list(df)[2] + '(z)',
         legend=dict(
         x=0.75,
         y=1,
@@ -146,29 +242,6 @@ def make3dClusterPlot(df,colors_array):
 
     # plots and opens html page
     plotly.offline.plot(fig, filename='3d-scatter-cluster.html')
-
-def make3dPlot(dataframe):
-    z_data = dataframe
-    colnames = (dataframe.columns.values)
-    data = [
-       go.Surface(
-           z=z_data.as_matrix()
-       )
-    ]
-    layout = go.Layout(
-       title=colnames[2],
-       autosize=False,
-       width=500,
-       height=500,
-       margin=dict(
-           l=65,
-           r=50,
-           b=65,
-           t=90
-       )
-    )
-    fig = go.Figure(data=data, layout=layout)
-    plot(fig)
 
 # clustering FUNCTIONS
 def kmeans_decision_algo(df, cluster, normalized):
@@ -390,59 +463,6 @@ def plot_three_val_3d(df, x, y, z, color, alpha):
     plt.show()
     return fileName
 
-'''
-I started adding here
-
-'''
-def plot_3_val_3d_normalize_all(df, x, y, z, normalize, color, alpha):
-    if(normalize == True):
-        df = normalize_df(df)
-    fig = plt.figure(figsize = (20,15))
-    ax = fig.add_subplot(111, projection='3d')
-    p = ax.scatter(df[x], df[y], df[z], alpha = alpha, marker = '.', c = color)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    ax.set_zlabel(z)
-    if(type(color) != str):
-        fig.colorbar(p)
-    plt.show()
-
-def plot_3_val_3d_normalize_individual(df, x, x_norm, y, y_norm, z, z_norm, color, opacity):
-    if(x_norm == True):
-        df['Normalized ' + x] = normalize_df(series_convertor(df[x])).values
-        x = 'Normalized ' + x
-    if(y_norm == True):
-        df['Normalized ' + y] = normalize_df(series_convertor(df[y])).values
-        y = 'Normalized ' + y
-    if(z_norm == True):
-        df['Normalized ' + z] = normalize_df(series_convertor(df[z])).values
-        z = 'Normalized ' + z
-    fig = plt.figure(figsize = (20, 15))
-    ax = fig.add_subplot(111, projection='3d')
-    p = ax.scatter(df[x], df[y], df[z], alpha = opacity, marker = '.', c = color)
-    ax.set_xlabel(x)
-    ax.set_ylabel(y)
-    ax.set_zlabel(z)
-    plt.show()
-
-def kmean_plot(df, xyz_array, kmean_labels, cluster_size):
-    fig = plt.figure(figsize=(24,15))
-    ax = fig.gca(projection='3d')
-    x = xyz_array[0]
-    y = xyz_array[1]
-    z = xyz_array[2]
-    for l, c in zip(range(cluster_size), color_array):
-        current_members = (kmean_labels == l)
-        ax.scatter(df.iloc[current_members][x], df.iloc[current_members][y], df.iloc[current_members][z], color=c, marker='.', alpha=0.25, label=c)
-    ax.set_xlabel(x)
-    ax.set_xlabel(y)
-    ax.set_xlabel(z)
-    ax.legend()
-    ax.set_title('Clustering displayed in ' + x + ' ' + y + ' ' + z + ' space')
-
-'''
-Ended here
-'''
 
 def plotHistogram(df, binNumbers):
     fileName = df.columns.values.tolist()[-1] + 'HistogramWith' + str(binNumbers) + 'Bins.png'
@@ -489,9 +509,13 @@ def plot(df, xname, yname):
 
 # input file (tif or xyz) -> output pandas dataframe
 def fileToDataframe(file):
-    df = gr.from_file(file).to_pandas()
-    df = df[["x", "y", "value"]].copy()
-    df.columns = ["x", "y", names[file]]
+    if '.xyz' in file:
+        df = pandas.DataFrame(pandas.read_csv(file, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
+        df.columns =['x', 'y', names[file]]
+    else:
+        df = gr.from_file(file).to_pandas()
+        df = df[["x", "y", "value"]].copy()
+        df.columns = ["x", "y", names[file]]
     return df
 
 
@@ -585,6 +609,7 @@ def visualizeCovariance(listOfDataframes, norm = False):
     plt.show()
     return fileName
 
+#VISUALIZATION
 ###ONE LAYER VISUAL###
 def logAndCorrelation1(element1, rows, column, bins):
     element1Value = ""
@@ -632,7 +657,6 @@ def logAndCorrelation1(element1, rows, column, bins):
     plt.show()
     return fileName
 ###END OF ONE LAYER###
-
 ###TWO LAYER VISUAL###
 def logAndCorrelation2(element1, element2, row, column, bins):
     element1Value = ""
@@ -929,9 +953,9 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
     plt.show()
     return fileName
 ###END OF THREE LAYER###
-
-
 ## END OF FUNCTIONS
+
+
 
 
 questions = [
@@ -964,12 +988,12 @@ elif len(df) == 0:
     exit(0)
 # they chose 1 layer
 else:
-    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot', 'Visualization Graphs(1)']
+    choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot', 'Clustering', 'Visualization Graphs(1)']
 
 
 analysis = [
              inquirer.Checkbox('Analysis',
-                               message="What kinds of ananlysis do you want to run on the layers chosen?",
+                               message="What kinds of analysis do you want to run on the layers chosen?",
                                choices= choicesList,
                                ),
              ]
@@ -978,11 +1002,11 @@ respuesta = inquirer.prompt(analysis)
 
 dataframe = aggregateValues(df)
 
-
+#done
 if 'Stats' in respuesta['Analysis']:
     print(getStats(df))
 
-
+#done
 if 'Covariance' in respuesta['Analysis']:
     aggregatedDataframe = aggregateValues(df)
     while True:
@@ -994,18 +1018,18 @@ if 'Covariance' in respuesta['Analysis']:
             Image.open(visualizeCovariance(df, norm = False)).show()
             break
 
-
+#done
 if 'Correlation' in respuesta['Analysis']:
     # normalization doesn't matter (produces the same output)
     img = Image.open(visualizeCorrelation(df))
     img.show()
 
-
+#done
 if 'Variance' in respuesta['Analysis']:
     img = Image.open(visualizeVariance(dataframe, names[answers['Layers'][0]]))
     img.show()
 
-
+#done
 if 'Histogram' in respuesta['Analysis']:
     try:
         bins = int(input("How many bins for histogram (minimum 10)?"))
@@ -1093,7 +1117,7 @@ if 'Visualization Graphs(3)' in respuesta['Analysis']:
 ###END OF THREE LAYER VISUAL###
 
 # clustering
-# TODO - crashes if 2 files are choosen
+# TODO NEEDS TO TAKE IN SOME OTHER STUFF, LIKE COLUMN NAMES, NEED TO BE ABLE TO READ IN FUTURE DATAFRAMES
 if 'Clustering' in respuesta['Analysis']:
     # ask for number of clusters
     while True:
@@ -1133,9 +1157,12 @@ if 'Clustering' in respuesta['Analysis']:
     #         break
     wholeDf = df[0]
     for x in range(0, len(df)-1):
-        wholeDf = pandas.merge(wholeDf, df[x+1], on=['Lat', 'Long'])
+        wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on=['Lat', 'Long'])
 
+    for answer in answers['Layers']:
+        wholeDf=wholeDf[wholeDf[names[answer]].notnull()]
 
+    wholeDf.to_csv('WholeDf.csv')
     cAnswerLength = 0
     while cAnswerLength!=3 and cAnswerLength!=2:
         cluster = [
@@ -1156,7 +1183,7 @@ if 'Clustering' in respuesta['Analysis']:
         kmean_plot_2_val(wholeDf, cAnswer['Cluster'], labels, clusterSize)
 
     if cAnswerLength == 3:
-        make3dClusterPlot(chris_needs_a_dataframe(wholeDf,cAnswer['Cluster'],labels),color_array)
+        make3dClusterPlot(dataframe_label_assign(wholeDf,cAnswer['Cluster'],labels),color_array)
     # fileName =   cluster_visualizer(wholeDf, cAnswer['Cluster'][0], cAnswer['Cluster'][1], cAnswer['Cluster'][2], 3)
     # Image.open(fileName).show()
 
@@ -1191,12 +1218,12 @@ if 'Plot layer' in respuesta['Analysis']:
 
 
 
+
+
 if '3d plot' in respuesta['Analysis']:
-    fileName = plot_three_val_3d(df[0], 'Lat', 'Long', names[answers['Layers'][0]], 'blue' , 0.2)
+    fileName = make3dPlot(df[0], 'Lat', 'Long', names[answers['Layers'][0]], 'blue' , 0.2)
     Image.open(fileName).show()
     print(df[0].head())
-    # TODO - make3dPlot crashes
-    make3dPlot(df[0], color_array)
 
 
 while True:
@@ -1352,8 +1379,8 @@ while True:
         for col in temp_cols:
             completeDataframe[col] = completeDataframe[col].interpolate(method='linear')
 
-        fileName = plot_hours_all(completeDataframe, 'Longitude', 'Latitude', completeDataframe.columns[2:26], color_array)
-        Image.open(fileName).show()
+        subsampleDF = dataframeSubsampler(completeDataframe,5)
+        plotAllTemp(subsampleDF,'Longitude','Latitude',subsampleDF.columns[2:26],color_array)
         break
     elif visualizeTemp == 'n':
         print("bless your soul!")
