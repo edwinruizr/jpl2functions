@@ -32,8 +32,9 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
             marker = dict( opacity=0.9, size=4, color=color_array[counter], line=dict(width=0) )
         )
         data.append( trace )
+    
 
-     layout = dict(
+    layout = dict(
         title = 'Plot of all Temperatures(' + str(subsampleVal) + '% of data subsampled)',
         annotations=[
         dict(
