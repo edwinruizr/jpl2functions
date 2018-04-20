@@ -68,6 +68,12 @@ def fileToDataframe(file, columnName):
     df.columns =['x', 'y', columnName]
     return df
 
+#replaces XY values of element files with lat long values of LOLA. NOT A CONVERSION
+def replaceXYwithLatLong(elementDF,lolaDF):
+    updatedDF = elementDF
+    updatedDF.rename(columns={'x': 'Longitude', 'y': 'Latitude'},inplace=True)
+    updatedDF.update(lolaDF)
+    return updatedDF
 
 def aggregateValues(listOfDataframes):
     """
