@@ -71,7 +71,7 @@ def fileToDataframe(file, columnName):
 #replaces XY values of element files with lat long values of LOLA. NOT A CONVERSION
 def replaceXYwithLatLong(elementDF,lolaDF):
     updatedDF = elementDF
-    updatedDF.rename(columns={'x': 'Longitude', 'y': 'Latitude'},inplace=True)
+    updatedDF.rename(columns={'x': 'Long', 'y': 'Lat'},inplace=True)
     updatedDF.update(lolaDF)
     return updatedDF
 
