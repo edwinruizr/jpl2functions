@@ -424,7 +424,6 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
 
 
 ## END OF FUNCTIONS
-
 questions = [
              inquirer.Checkbox('Layers',
                                message="What layers do you want to analyze?",
@@ -432,6 +431,11 @@ questions = [
                                ),
              ]
 answers = inquirer.prompt(questions)
+
+global_dataframe = pandas.DataFrame()
+for name in names.keys():
+    global_dataframe = pandas.concat([global_dataframe, fileToDataframe(names[name], name)], axis=1)
+global_dataframe = global_dataframe.loc[:, ~global_dataframe.columns.duplicated()]
 
 df = []
 # answers holds the layers to be analyzed
@@ -441,14 +445,7 @@ for answer in answers['Layers']:
     tempDf = tempDf.rename(columns={"x": "Lat", "y": "Long"})
     df.append(tempDf)
 
-    # for col in tempDf.columns:
-    #     df[col] = df[col].interpolate(method='linear')
-    #         for col in temp_cols:
-#             completeDataframe[col] = completeDataframe[col].interpolate(method='linear')
-
-
 #df now is a list of dataframes for the files selected
-
 
 if len(df) == 2:
     choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Plot x vs y', 'Visualization Graphs(2)']
@@ -472,6 +469,7 @@ analysis = [
              ]
 respuesta = inquirer.prompt(analysis)
 dataframe = aggregateValues(df)
+
 for col in dataframe.columns:
     dataframe[col] = dataframe[col].interpolate(method='linear')
 
@@ -590,7 +588,15 @@ if 'Visualization Graphs(3)' in respuesta['Analysis']:
 # clustering
 # TODO NEEDS TO TAKE IN SOME OTHER STUFF, LIKE COLUMN NAMES, NEED TO BE ABLE TO READ IN FUTURE DATAFRAMES
 if 'Clustering' in respuesta['Analysis']:
+
+    # daterframe = pandas.DataFrame()
+    # for name in names.keys():
+    #     daterframe = pandas.concat([daterframe, fileToDataframe(names[name], name)], axis=1)
+    #     daterframe = daterframe.loc[:, ~daterframe.columns.duplicated()]
+
+    # print(daterframe.head())
     # ask for number of clusters
+ 
     while True:
         try:
             clusterSize = int(input("How many clusters? (2-10)"))
@@ -630,7 +636,8 @@ if 'Clustering' in respuesta['Analysis']:
         cluster = [
                      inquirer.Checkbox('Cluster',
                                        message="What 3 elements do you want to visualize?",
-                                       choices= list(wholeDf.columns.values),
+                                       choices = list(global_dataframe.columns.values),
+#                                       choices= list(wholeDf.columns.values),
                                        ),
                      ]
         cAnswer = inquirer.prompt(cluster)
@@ -642,10 +649,10 @@ if 'Clustering' in respuesta['Analysis']:
     labels = kmean(wholeDf, elementsList, normalizeBoolList, clusterSize)
     # run function with choices choosen
     if cAnswerLength == 2:
-        kmean_plot_2_val(wholeDf, cAnswer['Cluster'], labels, clusterSize)
+        kmean_plot_2_val(global_dataframe, cAnswer['Cluster'], labels, clusterSize)
 
     if cAnswerLength == 3:
-        make3dClusterPlot(dataframe_label_assign(wholeDf,cAnswer['Cluster'],labels),color_array)
+        make3dClusterPlot(dataframe_label_assign(global_dataframe,cAnswer['Cluster'],labels),color_array)
 
 
 if 'Plot x vs y' in respuesta['Analysis']:
