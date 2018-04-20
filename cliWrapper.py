@@ -642,18 +642,20 @@ def logAndCorrelation1(element1, rows, column, bins):
         e1_log_arr.append(e1_key_log)
     #Histogram
     plt.figure(1)
-    plt.subplot(2,2,1)
     plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
     plt.xlabel(r'$log(\sigma_1)$')
     plt.ylabel(r'Frequency')
-    plt.hist(e1_log_arr, bins)
+    plt.hist(e1_log_arr, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
+    plt.show()
+
     #Variance
     e1_Var = numpy.var(e1_d[key][element1Value])
-    plt.subplot(2,2,2)
+    plt.figure(2)
     plt.title(r'$Frequency\ vs\ Effective\ Variance$')
     plt.xlabel(r'$Effective Variance$')
     plt.ylabel(r'Frequency')
-    plt.hist(e1_Var, bins)
+    plt.hist(e1_Var, bins, edgecolor='black', linewidth=1.2)
     plt.show()
     return fileName
 ###END OF ONE LAYER###
@@ -715,11 +717,13 @@ def logAndCorrelation2(element1, element2, row, column, bins):
         e2_log_arr.append(e2_key_log)
 
     # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
-    plt.subplot(2,2,1)
+    plt.figure(2)
+    plt.subplot(2, 1, 1)
     plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
     plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
     plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
     plt.scatter(e2_log_arr, e1_log_arr)
+    plt.tight_layout()
 
     ##### Correlation part #####
     el1 = element1.corr()
@@ -751,18 +755,29 @@ def logAndCorrelation2(element1, element2, row, column, bins):
         e1_log_arr.append(e1_key_log)
 
     # Graph to show element1 vs p12
-    plt.subplot(2,2,2)
+    plt.subplot(2, 1, 2)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
     plt.scatter(corr_d, e1_log_arr)
+    plt.tight_layout()
+    #plt.show()
 
     #Histograms
-    plt.subplot(2,2,4)
+    plt.figure(1)
+    plt.subplot(2, 1, 1)
+    plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
+    plt.xlabel(r'$log(\sigma_1)$')
+    plt.ylabel(r'Frequency')
+    plt.hist(e1_log_arr, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
+
+    plt.subplot(2, 1, 2)
     plt.title(r'$Frequency\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'Frequency')
-    plt.hist(corr_d, bins)
+    plt.hist(corr_d, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
     plt.show()
     return fileName
 ###END OF TWO LAYER###
@@ -859,11 +874,13 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
 
 
     # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
-    plt.subplot(4,3,2)
+    plt.figure(2)
+    plt.subplot(2, 2, 1)
     plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
     plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
     plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
     plt.scatter(e2_log_arr, e1_log_arr)
+    plt.tight_layout()
 
     ##### Correlation part #####
     el1 = element1.corr()
@@ -898,12 +915,12 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
 
     # Graph to show element1 vs p12
 
-    plt.subplot(4,3,5)
+    plt.subplot(2, 2, 2)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
     plt.scatter(corr_d, e1_log_arr)
-
+    plt.tight_layout()
 
 
     # p23 correlation
@@ -920,31 +937,47 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
             corr_d3.append(correlation2[x][y])
 
     #Graph to show element1 vs p23
-    plt.subplot(4,3,8)
+    plt.subplot(2, 2, 3)
     plt.title(r'$log(\sigma_1)\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
     plt.scatter(corr_d2, e1_log_arr)
+    plt.tight_layout()
 
     #Graph to show p12 vs p23
-    plt.subplot(4,3,11)
+    plt.subplot(2, 2, 4)
     plt.title(r'$\rho_{12}\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'$\rho_{12}$')
     plt.scatter(corr_d2, corr_d)
+    plt.tight_layout()
+    plt.show()
 
-    plt.subplot(4,3,1)
+    plt.figure(1)
+    plt.subplot(2, 2, 1)
+    plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
+    plt.xlabel(r'$log(\sigma_1)$')
+    plt.ylabel(r'Frequency')
+    plt.hist(e1_log_arr, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
+
+    plt.subplot(2, 2, 3)
     plt.title(r'$Frequency\ vs\ \rho_{12}$')
     plt.xlabel(r'$\rho_{12}$')
     plt.ylabel(r'Frequency')
-    plt.hist(corr_d, bins)
-    plt.subplot(4,3,4)
+    plt.hist(corr_d, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
+
+    plt.subplot(2, 2, 4)
     plt.title(r'$Frequency\ vs\ \rho_{23}$')
     plt.xlabel(r'$\rho_{23}$')
     plt.ylabel(r'Frequency')
-    plt.hist(corr_d2, bins)
+    plt.hist(corr_d2, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
+    plt.show()
 
-    fig = plt.figure(2)
+
+    fig = plt.figure(3)
     ax = Axes3D(fig)
     ax.scatter(corr_d, corr_d2, corr_d3)
     ax.set_xlabel(r'$\rho_{12}$')
