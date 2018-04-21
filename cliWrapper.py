@@ -15,13 +15,13 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
     #plotly.offline.init_notebook_mode()
 
     data = []
-    
+
     #check if dataframe is too large for plotting
     subsampleVal = 100
     if((len(df)*len(array_of_cols)) > 500000):
         subsampleVal = int((500000*100)/(len(df)*len(array_of_cols)))
         df = dataframeSubsampler(df,subsampleVal)
-    
+
     for counter, i in enumerate(array_of_cols):
 
         trace = dict(
@@ -32,7 +32,7 @@ def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
             marker = dict( opacity=0.9, size=4, color=color_array[counter], line=dict(width=0) )
         )
         data.append( trace )
-    
+
 
     layout = dict(
         title = 'Plot of all Temperatures(' + str(subsampleVal) + '% of data subsampled)',
@@ -456,8 +456,6 @@ for i in range(0, 24):
 
 if len(df) == 2:
     choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Plot x vs y', 'Visualization Graphs(2)']
-elif hours == answers['Layers']:
-    choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Visualization Graphs(3)', 'Plot all temp']
 # chose multiple layers442
 elif len(df) > 1:
     choicesList = ['Stats', 'Covariance', 'Correlation', 'Clustering', 'Visualization Graphs(3)']
@@ -469,6 +467,8 @@ elif len(df) == 0:
 else:
     choicesList = ['Stats', 'Variance', 'Histogram', 'Plot layer', '3d plot', 'Clustering', 'Visualization Graphs(1)']
 
+if set(hours).issubset(answers['Layers']) and len(hours) == len(answers['Layers']):
+    choicesList.append('Plot all temp')
 
 analysis = [
              inquirer.Checkbox('Analysis',
@@ -488,7 +488,7 @@ if 'Stats' in respuesta['Analysis']:
 
 #done
 if 'Covariance' in respuesta['Analysis']:
-    
+
     while True:
         visualizeInput = input("Do you want to normalize the data? (y/n)")
         if visualizeInput == 'y':
@@ -630,9 +630,9 @@ if 'Clustering' in respuesta['Analysis']:
         wholeDf=wholeDf[wholeDf[answer].notnull()]
 
     cAnswerLength = 0
-    
+
     print(wholeDf.head())
-    
+
     while cAnswerLength!=3 and cAnswerLength!=2:
         cluster = [
                      inquirer.Checkbox('Cluster',
