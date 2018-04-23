@@ -631,7 +631,6 @@ if 'Clustering' in respuesta['Analysis']:
 
     cAnswerLength = 0
 
-    print(wholeDf.head())
 
     while cAnswerLength!=3 and cAnswerLength!=2:
         cluster = [
