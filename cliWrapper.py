@@ -425,7 +425,7 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
     plt.ylabel(r'$\rho_{12}$')
     plt.scatter(corr_d2, corr_d)
     plt.tight_layout()
-    plt.show()
+    #plt.show()
 
     plt.figure(1)
     plt.subplot(2, 2, 1)
