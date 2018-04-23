@@ -192,9 +192,6 @@ def logAndCorrelation2(element1, element2, row, column, bins):
         e2_key_log = numpy.log(e2_key_std)
         e2_log_arr.append(e2_key_log)
 
-##variance
-
-##end of variance
     # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
     plt.figure(2)
     plt.subplot(2, 1, 1)
@@ -241,20 +238,6 @@ def logAndCorrelation2(element1, element2, row, column, bins):
     plt.scatter(corr_d, e1_log_arr)
     plt.tight_layout()
     #plt.show()
-
-    #Variance
-    '''
-    plt.figure(5)
-    plt.xlabel('Effective Variance', fontsize= 20)
-    plt.ylabel('Frequency', fontsize= 20)
-# plt.title('Effective Variance', fontsize=20)
-    plt.hist(maxList, bins, edgecolor='black', linewidth=1.2)
-    plt.tight_layout()
-    '''
-    #end of variance
-
-
-
     #Histograms
     plt.figure(1)
     plt.subplot(2, 1, 1)
