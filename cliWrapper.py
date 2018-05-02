@@ -2,139 +2,11 @@ import inquirer
 from functionsLib import *
 
 ## FUNCTIONS
-# subsamples dataframe by percent, ie subsamplePercent = 5 means 5% of values in dataframe
-def dataframeSubsampler(df,subsamplePercent):
-    subsampleVal = 100/subsamplePercent
-    df_out = df[0::int(subsampleVal)]
-    return df_out
-
-
-# TODO - figure how to implement this with the choices
-def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
-    #for jupyter use
-    #plotly.offline.init_notebook_mode()
-
-    data = []
-
-    #check if dataframe is too large for plotting
-    subsampleVal = 100
-    if((len(df)*len(array_of_cols)) > 500000):
-        subsampleVal = int((500000*100)/(len(df)*len(array_of_cols)))
-        df = dataframeSubsampler(df,subsampleVal)
-
-    for counter, i in enumerate(array_of_cols):
-
-        trace = dict(
-            name = i,
-            x = df[xcol], y = df[ycol], z = df[i],
-            type = "scatter3d",
-            mode = 'markers',
-            marker = dict( opacity=0.9, size=4, color=color_array[counter], line=dict(width=0) )
-        )
-        data.append( trace )
-
-
-    layout = dict(
-        title = 'Plot of all Temperatures(' + str(subsampleVal) + '% of data subsampled)',
-        annotations=[
-        dict(
-            x=0.79,
-            y=1.02,
-            align="right",
-            valign="top",
-            text='Temp Layer',
-            showarrow=False,
-            xref="paper",
-            yref="paper",
-            xanchor="middle",
-            yanchor="top"
-        )
-        ],
-        legend=dict(
-        x=0.75,
-        y=1,
-        traceorder='normal',
-        font=dict(
-            family='sans-serif',
-            size=15,
-            color='#000'
-        ),
-        bgcolor='#E2E2E2',
-        bordercolor='#FFFFFF',
-        borderwidth=2
-        ),
-        scene = dict(
-        xaxis = dict( title=xcol, zeroline=False ),
-        yaxis = dict( title=ycol, zeroline=False ),
-        zaxis = dict( title='Z value', zeroline=False ),
-        ),
-    )
-
-    fig = dict(data=data, layout=layout)
-
-    # plots and opens html page
-    plotly.offline.plot(fig, filename='3d-temp-plot.html')
 
 
 
 #VISUALIZATION
-###ONE LAYER VISUAL###
-def logAndCorrelation1(element1, rows, column, bins):
-    element1Value = ""
 
-    for key in element1.keys():
-        if key != 'Lat' and key!='Long':
-            element1Value = key
-    fileName = element1Value + str(row*column) +'SubsectionsLogAndCorrelationPlot.png'
-    if os.path.isfile(fileName):
-        return fileName
-
-    xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
-    yRange_e1 = element1['Long'].max() - element1['Long'].min()
-    section_e1 = math.ceil(xRange_e1/row)         # length specified by user
-    ySection_e1 = math.ceil(yRange_e1/column)
-    min_e1 = element1['Lat'].min()
-    max_e1 = element1['Lat'].max()
-    ymin_e1 = element1['Long'].min()
-    ymax_e1 = element1['Long'].max()
-
-    e1_d={}
-    for x in range(0,row):
-        for y in range(0,column):
-            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
-    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
-    e1_log_arr = []
-    for key, value in e1_d.items():
-        e1_key_std = numpy.std(e1_d[key][element1Value])
-        e1_key_log = numpy.log(e1_key_std)
-        e1_log_arr.append(e1_key_log)
-
-        #variance
-    covMatrices1el = []
-    for key, value in e1_d.items():
-        covariance1 = numpy.cov(e1_d[key][element1Value])
-        covMatrices1el.append(covariance1)
-        #print(len(covMatrices1el))
-
-
-    #Histogram
-    plt.figure(1)
-    plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
-    plt.xlabel(r'$log(\sigma_1)$')
-    plt.ylabel(r'Frequency')
-    plt.hist(e1_log_arr, bins, edgecolor='black', linewidth=1.2)
-    plt.tight_layout()
-    plt.show()
-
-    #Variance
-    plt.figure(2)
-    plt.title(r'$Frequency\ vs\ Effective\ Variance$')
-    plt.xlabel(r'$Effective Variance$')
-    plt.ylabel(r'Frequency')
-    plt.hist(covMatrices1el, edgecolor='black', linewidth=1.2)
-    plt.show()
-    return fileName
-###END OF ONE LAYER###
 ###TWO LAYER VISUAL###
 def logAndCorrelation2(element1, element2, row, column, bins):
     element1Value = ""
@@ -385,6 +257,7 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
     for key, value in d.items():
         e1_key_std = numpy.std(d[key][element1Value])
         e1_key_log = numpy.log(e1_key_std)
+        # if (e1_key_log)
         e1_log_arr.append(e1_key_log)
 
     # Graph to show element1 vs p12
@@ -432,6 +305,8 @@ def logAndCorrelation3(element1, element2, element3, row, column, bins):
     plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
     plt.xlabel(r'$log(\sigma_1)$')
     plt.ylabel(r'Frequency')
+    print(e1_log_arr)
+    # print(len(e1_log_arr.dropna()))
     plt.hist(e1_log_arr, bins, edgecolor='black', linewidth=1.2)
     plt.tight_layout()
 
@@ -569,24 +444,17 @@ if 'Histogram' in respuesta['Analysis']:
 
 ###ONE LAYER VISUAL###
 if 'Visualization Graphs(1)' in respuesta['Analysis']:
-    # To show up the first time
-    row = int(input("How many rows for matrix? "))
-    column = int(input("How many columns for matrix? "))
-    bins = int(input("How many bins? "))
-    logAndCorrelation1(df[0], row, column, bins)
-
     # To allow user to change the size of the length without having to reload the program each time (Dr. Zhu wanted to implement this)
     # Also to allow user to exit if they want to stop looking at graphs
     while True:
+        # To show up the first time
+        row = int(input("How many rows for matrix? "))
+        column = int(input("How many columns for matrix? "))
+        bins = int(input("How many bins? "))
+        logAndCorrelation1(df[0], row, column, bins)
         userChoice = input("\nWould you like to continue to view graphs? (y/n)")
-        if userChoice == 'y':
-            row = int(input("How many rows for matrix? "))
-            column = int(input("How many columns for matrix? "))
-            bins = int(input("How many bins? "))
-            fileName = logAndCorrelation1(df[0], row, column, bins)
-            Image.open(fileName).show()
-        elif userChoice == 'n':
-            exit(0)
+        if userChoice == 'n':
+            break
 ###END OF ONE LAYER VISUAL###
 
 ###TWO LAYERS VISUAL###
@@ -660,10 +528,14 @@ if 'Clustering' in respuesta['Analysis']:
                 break
 
 
-    wholeDf = df[0]
+    wholeDf = df[0].round({'Lat': 2, 'Long': 2})
 
     for x in range(0, len(df)-1):
-        wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on=['Lat', 'Long'])
+
+        df[x+1]=df[x+1].round({'Lat': 2, 'Long': 2})
+
+        wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on = ['Lat','Long'])
+
 
     for answer in answers['Layers']:
         wholeDf=wholeDf[wholeDf[answer].notnull()]
