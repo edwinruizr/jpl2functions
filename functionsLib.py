@@ -61,7 +61,7 @@ names = {
 def fileToDataframe(file, columnName):
     if '.xyz' in file:
         df = pandas.DataFrame(pandas.read_csv(file, delim_whitespace= True,encoding="utf-8-sig", dtype=numpy.float64))
-
+        df = df.interpolate()
     else:
         df = gr.from_file(file).to_pandas()
         df = df[["x", "y", "value"]].copy()

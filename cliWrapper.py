@@ -529,6 +529,7 @@ if 'Clustering' in respuesta['Analysis']:
 
 
     wholeDf = df[0].round({'Lat': 2, 'Long': 2})
+    before_merge = wholeDf
 
     for x in range(0, len(df)-1):
 
@@ -536,7 +537,16 @@ if 'Clustering' in respuesta['Analysis']:
 
         wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on = ['Lat','Long'])
 
-    
+    print("not equal")
+    for count, i in enumerate(wholeDf['Lat']):
+        if(before_merge['Lat'][count] != i):
+            print(count)
+            print(before_merge['Lat'][count])
+            print(before_merge.iloc[count])
+            print(wholeDf.iloc[count])
+            print(i)
+            exit()
+
     for answer in answers['Layers']:
         wholeDf=wholeDf[wholeDf[answer].notnull()]
     print(wholeDf)
