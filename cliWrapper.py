@@ -536,10 +536,10 @@ if 'Clustering' in respuesta['Analysis']:
 
         wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on = ['Lat','Long'])
 
-
+    
     for answer in answers['Layers']:
         wholeDf=wholeDf[wholeDf[answer].notnull()]
-
+    print(wholeDf)
     cAnswerLength = 0
 
 

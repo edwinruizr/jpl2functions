@@ -25,9 +25,9 @@ color_array = ['#FF2052', '#E9D66B', '#00308F', '#3B3C36', '#85BB65', '#79C257',
 
 # dictionary holding filename and according element name
 names = {
-    'Thorium' : 'LP_GRS_Th_Global_2ppd.tif',
-    'Iron' : 'LP_GRS_Fe_Global_2ppd.tif',
-    'Hydrogen' : 'LP_GRS_H_Global_2ppd.tif',
+    'Thorium' : 'thorium.xyz',
+    'Iron' : 'iron.xyz',
+    'Hydrogen' : 'hydrogen.xyz',
     'LOLA (elevation)' : 'resizedLOLA.xyz',
     'Temp Hour 00' : 'temp_avg_hour00.xyz',
     'Temp Hour 01' : 'temp_avg_hour01.xyz',
@@ -65,7 +65,7 @@ def fileToDataframe(file, columnName):
     else:
         df = gr.from_file(file).to_pandas()
         df = df[["x", "y", "value"]].copy()
-    df.columns =['x', 'y', columnName]
+    df.columns =['Lat', 'Long', columnName]
     return df
 
 
@@ -390,3 +390,255 @@ def kmean_plot_2_val(df, xy_array, kmean_labels, cluster_size):
     plt.xlabel(x)
     plt.ylabel(y)
     plt.show()
+
+# subsamples dataframe by percent, ie subsamplePercent = 5 means 5% of values in dataframe
+def dataframeSubsampler(df,subsamplePercent):
+    subsampleVal = 100/subsamplePercent
+    df_out = df[0::int(subsampleVal)]
+    return df_out
+
+
+def plotAllTemp(df,xcol,ycol,array_of_cols,color_array,):
+    #for jupyter use
+    #plotly.offline.init_notebook_mode()
+
+    data = []
+
+    #check if dataframe is too large for plotting
+    subsampleVal = 100
+    if((len(df)*len(array_of_cols)) > 500000):
+        subsampleVal = int((500000*100)/(len(df)*len(array_of_cols)))
+        df = dataframeSubsampler(df,subsampleVal)
+
+    for counter, i in enumerate(array_of_cols):
+
+        trace = dict(
+            name = i,
+            x = df[xcol], y = df[ycol], z = df[i],
+            type = "scatter3d",
+            mode = 'markers',
+            marker = dict( opacity=0.9, size=4, color=color_array[counter], line=dict(width=0) )
+        )
+        data.append( trace )
+
+
+    layout = dict(
+        title = 'Plot of all Temperatures(' + str(subsampleVal) + '% of data subsampled)',
+        annotations=[
+        dict(
+            x=0.79,
+            y=1.02,
+            align="right",
+            valign="top",
+            text='Temp Layer',
+            showarrow=False,
+            xref="paper",
+            yref="paper",
+            xanchor="middle",
+            yanchor="top"
+        )
+        ],
+        legend=dict(
+        x=0.75,
+        y=1,
+        traceorder='normal',
+        font=dict(
+            family='sans-serif',
+            size=15,
+            color='#000'
+        ),
+        bgcolor='#E2E2E2',
+        bordercolor='#FFFFFF',
+        borderwidth=2
+        ),
+        scene = dict(
+        xaxis = dict( title=xcol, zeroline=False ),
+        yaxis = dict( title=ycol, zeroline=False ),
+        zaxis = dict( title='Z value', zeroline=False ),
+        ),
+    )
+
+    fig = dict(data=data, layout=layout)
+
+    # plots and opens html page
+    plotly.offline.plot(fig, filename='3d-temp-plot.html')
+
+
+###ONE LAYER VISUAL###
+def logAndCorrelation1(element1, row, column, bins):
+    element1Value = ""
+
+    for key in element1.keys():
+        if key != 'Lat' and key!='Long':
+            element1Value = key
+    fileName = element1Value + str(row*column) +'SubsectionsLogAndCorrelationPlot.png'
+    if os.path.isfile(fileName):
+        return fileName
+
+    xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
+    yRange_e1 = element1['Long'].max() - element1['Long'].min()
+    section_e1 = math.ceil(xRange_e1/row)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/column)
+    min_e1 = element1['Lat'].min()
+    max_e1 = element1['Lat'].max()
+    ymin_e1 = element1['Long'].min()
+    ymax_e1 = element1['Long'].max()
+
+    e1_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
+    e1_log_arr = []
+    for key, value in e1_d.items():
+        e1_key_std = numpy.std(e1_d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+        #variance
+    covMatrices1el = []
+    for key, value in e1_d.items():
+        covariance1 = numpy.cov(e1_d[key][element1Value])
+        covMatrices1el.append(covariance1)
+        #print(len(covMatrices1el))
+
+
+    #Histogram
+    plt.figure(1)
+    plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
+    plt.xlabel(r'$log(\sigma_1)$')
+    plt.ylabel(r'Frequency')
+    plt.hist(e1_log_arr, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
+    plt.show()
+
+    #Variance
+    plt.figure(2)
+    plt.title(r'$Frequency\ vs\ Effective\ Variance$')
+    plt.xlabel(r'$Effective Variance$')
+    plt.ylabel(r'Frequency')
+    plt.hist(covMatrices1el, edgecolor='black', linewidth=1.2)
+    plt.show()
+    return fileName
+###END OF ONE LAYER###
+
+
+def logAndCorrelation2(element1, element2, row, column, bins):
+    element1Value = ""
+    element2Value = ""
+
+    for key in element1.keys():
+        if key != 'Lat' and key!='Long':
+            element1Value = key
+    for key in element2.keys():
+        if key != 'Lat' and key!='Long':
+            element2Value = key
+
+    fileName = element1Value + element2Value + str(row*column) +'SubsectionsLogAndCorrelationPlot.png'
+    if os.path.isfile(fileName):
+        return fileName
+
+    xRange_e1 = element1['Lat'].max() - element1['Lat'].min()
+    yRange_e1 = element1['Long'].max() - element1['Long'].min()
+    xRange_e2 = element2['Lat'].max() - element2['Lat'].min()
+    yRange_e2 = element2['Long'].max() - element2['Long'].min()
+
+    section_e1 = math.ceil(xRange_e1/row)         # length specified by user
+    ySection_e1 = math.ceil(yRange_e1/column)
+    section_e2 = math.ceil(xRange_e2/row)
+    ySection_e2 = math.ceil(yRange_e2/column)
+
+    min_e1 = element1['Lat'].min()
+    max_e1 = element1['Lat'].max()
+    min_e2 = element2['Lat'].min()
+    max_e2 = element2['Lat'].max()
+    ymin_e1 = element1['Long'].min()
+    ymax_e1 = element1['Long'].max()
+    ymin_e2 = element2['Long'].min()
+    ymax_e2 = element2['Long'].max()
+
+    e1_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e1_d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+    # Will contain the log(standard deviation) of each value in the matrix (Using this for scatterplot)
+    e1_log_arr = []
+    for key, value in e1_d.items():
+        e1_key_std = numpy.std(e1_d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+    e2_d={}
+    for x in range(0,row):
+        for y in range(0,column):
+            e2_d["matrix{0}{1}".format(x,y)]=element2[(min_e2+x*section_e2 <= element2['Lat']) & (element2['Lat'] < min_e2+(x+1)*section_e2) & (ymin_e2+y*ySection_e2 <= element2['Long']) & (element2['Long'] < ymin_e2+(y+1)*ySection_e2)]
+
+    e2_log_arr = []
+    for key, value in e2_d.items():
+        e2_key_std = numpy.std(e2_d[key][element2Value])
+        e2_key_log = numpy.log(e2_key_std)
+        e2_log_arr.append(e2_key_log)
+
+    # plt(x,y) -> plt(e2, e1) since first element should be on y axis and second element on x axis based on visualization paper
+    plt.figure(2)
+    plt.subplot(2, 1, 1)
+    plt.title(r'$log(\sigma_1)\ vs\ \log(\sigma_2)$')
+    plt.xlabel(r'$('+element2Value+')\ \log(\sigma_2)$')
+    plt.ylabel(r'$('+element1Value+')\ \log(\sigma_1)$')
+    plt.scatter(e2_log_arr, e1_log_arr)
+    plt.tight_layout()
+
+    ##### Correlation part #####
+    el1 = element1.corr()
+    el2 = element2.corr()
+
+    first_el = el1[element1Value]
+    second_el = el2[element2Value]
+
+    # p12 correlation
+    correlation = numpy.corrcoef(el1, el2)
+
+    # This loops through the correlation matrix and puts all the points into a single array. (Correlation matrix is 6x6 and corr_d will have a size of 36)
+    corr_d=[]
+    for x in range(0, len(correlation)):
+        for y in range(0, len(correlation)):
+            corr_d.append(correlation[x][y])
+
+    # This will change the size of e1_log_arr to have the same size as correlation (in order to plot on graph)
+    d={}
+    for x in range(0,6):
+        for y in range(0,6):
+            d["matrix{0}{1}".format(x,y)]=element1[(min_e1+x*section_e1 <= element1['Lat']) & (element1['Lat'] < min_e1+(x+1)*section_e1) & (ymin_e1+y*ySection_e1 <= element1['Long']) & (element1['Long'] < ymin_e1+(y+1)*ySection_e1)]
+
+    # Will contain the log(standard deviation) of each value (Using this for correlation scatterplot)
+    e1_log_arr = []
+    for key, value in d.items():
+        e1_key_std = numpy.std(d[key][element1Value])
+        e1_key_log = numpy.log(e1_key_std)
+        e1_log_arr.append(e1_key_log)
+
+    # Graph to show element1 vs p12
+    plt.subplot(2, 1, 2)
+    plt.title(r'$log(\sigma_1)\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'$('+ element1Value +')\ \log(\sigma_1)$')
+    plt.scatter(corr_d, e1_log_arr)
+    plt.tight_layout()
+    #plt.show()
+    #Histograms
+    plt.figure(1)
+    plt.subplot(2, 1, 1)
+    plt.title(r'$Frequency\ vs\ log(\sigma_1)$')
+    plt.xlabel(r'$log(\sigma_1)$')
+    plt.ylabel(r'Frequency')
+    plt.hist(e1_log_arr, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
+
+    plt.subplot(2, 1, 2)
+    plt.title(r'$Frequency\ vs\ \rho_{12}$')
+    plt.xlabel(r'$\rho_{12}$')
+    plt.ylabel(r'Frequency')
+    plt.hist(corr_d, bins, edgecolor='black', linewidth=1.2)
+    plt.tight_layout()
+    plt.show()
+###END OF TWO LAYER###
