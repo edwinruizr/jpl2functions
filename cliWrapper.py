@@ -349,7 +349,11 @@ answers = inquirer.prompt(questions)
 global_dataframe = pandas.DataFrame()
 for name in names.keys():
     global_dataframe = pandas.concat([global_dataframe, fileToDataframe(names[name], name)], axis=1)
-global_dataframe = global_dataframe.loc[:, ~global_dataframe.columns.duplicated()]
+
+    #sorted then dropped the last value because its not in one of the element files.
+global_dataframe = global_dataframe.loc[:, ~global_dataframe.columns.duplicated()].sort_values(by=['Lat', 'Long'])
+ #this index was not in the elements so i dropped. started at -89.25 for some reason.
+global_dataframe = global_dataframe.drop([258479])
 
 df = []
 # answers holds the layers to be analyzed
@@ -529,27 +533,16 @@ if 'Clustering' in respuesta['Analysis']:
 
 
     wholeDf = df[0].round({'Lat': 2, 'Long': 2})
-    before_merge = wholeDf
 
-    for x in range(0, len(df)-1):
+    for count, x in enumerate(df):
+        if(count != 0):
+            x = x.sort_values(by=['Lat', 'Long']).round({'Lat': 2, 'Long': 2})
+            wholeDf = wholeDf.merge(x, how='inner', left_on= ['Lat', 'Long'], right_on=['Lat', 'Long']).sort_values(by=['Lat', 'Long'])
 
-        df[x+1]=df[x+1].round({'Lat': 2, 'Long': 2})
 
-        wholeDf = pandas.merge(wholeDf, df[x+1], how='inner', on = ['Lat','Long'])
-
-    print("not equal")
-    for count, i in enumerate(wholeDf['Lat']):
-        if(before_merge['Lat'][count] != i):
-            print(count)
-            print(before_merge['Lat'][count])
-            print(before_merge.iloc[count])
-            print(wholeDf.iloc[count])
-            print(i)
-            exit()
-
-    for answer in answers['Layers']:
-        wholeDf=wholeDf[wholeDf[answer].notnull()]
-    print(wholeDf)
+    # for answer in answers['Layers']:
+    #     # wholeDf=wholeDf[wholeDf[answer].notnull()]
+    #     wholeDf = wholeDf[wholeDf[answer]]
     cAnswerLength = 0
 
 
